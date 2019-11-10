@@ -40,11 +40,12 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
     bl_idname = "scene.preview_fountain"
     bl_label = "Preview Screenplay"
 
-    # @classmethod
-    # def poll(cls, context):
-        # space = bpy.context.space_data # Is not getting the right context if clicked in 2. te
-        # return ((space.type == 'TEXT_EDITOR') and
-                # Path(space.text.filepath).suffix == ".fountain")
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
 
     def execute(self, context):
 
@@ -56,12 +57,12 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
 
         F = fountain.Fountain(fountain_script)
 
-        #        if 'title' in F.metadata:
-        #            file_name = F.metadata['title'][0]
-        #        else:
-        file_name = "Fountain"
-        #filename = "Preview_"+file_name[:-4]+".txt"
-        filename = "Preview" + ".txt"
+        if 'title' in F.metadata:
+            file_name = F.metadata['title'][0]
+        else:
+            file_name = "Fountain"
+        filename = "Preview_"+file_name+".txt"
+        #filename = "Preview" + ".txt"
 
         if filename not in bpy.data.texts:
             bpy.data.texts.new(filename)  # New document in Text Editor
@@ -151,11 +152,12 @@ class AREATYPE_OT_trim(bpy.types.Operator):
     bl_idname = "areatype.trimview"
     bl_label = "Dual View"
 
-    # @classmethod
-    # def poll(cls, context): # Is not getting the right context if clicked in 2. te
-        # space = bpy.context.space_data
-        # return ((space.type == 'TEXT_EDITOR') and
-                # Path(space.text.filepath).suffix == ".fountain")
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
 
     original_area = None
 
@@ -178,7 +180,7 @@ class AREATYPE_OT_trim(bpy.types.Operator):
                 break
 
         if otherarea:  #leave trim-mode
-            #join BROKEN!!
+
             bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y)
 
             # normal settings
@@ -189,12 +191,6 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             override['area'] = area
             override['space_data'] = area.spaces.active
 
-            for o in override:
-                print(o)
-                       # for region in area.regions:
-                           # if region.type == '':
-                               # break
-                       # override['region'] = region
             return {"FINISHED"}
 
         else:  # enter dual-mode
