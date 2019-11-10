@@ -6,10 +6,11 @@ bl_info = {
     "blender": (2, 80, 0),
     "location": "Text Editor > Sidebar",
     "description": "Adds functions for live editing of fountain file with live screenplay preview",
-    "warning": "",
+    "warning": "Dual toggle will not work in 2.81 and 2.82!",
     "wiki_url": "",
     "category": "Text Editor",
 }
+
 
 import bpy
 import textwrap
@@ -184,21 +185,24 @@ class AREATYPE_OT_trim(bpy.types.Operator):
 
             #join BROKEN!!
             #teardown(context)
-            bpy.ops.screen.area_join(cursor=(otherarea.x + thisarea.width + 1, otherarea.y))#, max_x=otherarea.x, max_y=otherarea.y) #broken
-            #bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y) #broken
+            #bpy.ops.screen.area_join(cursor=(otherarea.x + thisarea.width + 1, otherarea.y))#, max_x=otherarea.x, max_y=otherarea.y) #broken
+            bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y) #broken
 
             # normal settings
 
-            #bpy.ops.screen.screen_full_area()
-            #bpy.ops.screen.screen_full_area()
-            # override = context.copy()
-            # area = self.original_area
-            # override['area'] = area
-            # override['space_data'] = area.spaces.active
-            #            for region in area.regions:
-            #                if region.type == 'PREVIEW':
-            #                    break
-            #            override['region'] = region
+            bpy.ops.screen.screen_full_area()
+            bpy.ops.screen.screen_full_area()
+            override = context.copy()
+            area = self.original_area
+            override['area'] = area
+            override['space_data'] = area.spaces.active
+
+            for o in override:
+                print(o)
+                       # for region in area.regions:
+                           # if region.type == '':
+                               # break
+                       # override['region'] = region
             return {"FINISHED"}
 
         else:  # enter dual-mode
@@ -227,7 +231,8 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             area = self.original_area
             override['area'] = area
             override['space_data'] = area.spaces.active
-
+            override['space_data'].text = bpy.data.texts['Preview.txt']
+            
             for area in context.screen.areas:
                 if area not in arealist:
                     areax = area
