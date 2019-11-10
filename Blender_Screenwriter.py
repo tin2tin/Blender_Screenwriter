@@ -48,21 +48,21 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 Path(filepath).suffix == ".fountain")
 
     def execute(self, context):
-
+        space = bpy.context.space_data
         dir = os.path.dirname(bpy.data.filepath)
         if not dir in sys.path:
             sys.path.append(dir)
+
+        # current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        # bpy.data.texts[current_text]
+        # current_line = bpy.data.texts[current_text].line_number
+        # jump_to_line = 0
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
 
         F = fountain.Fountain(fountain_script)
 
-        # if 'title' in F.metadata:
-            # file_name = F.metadata['title'][0]
-        # else:
-            # file_name = "Fountain"
-        # filename = "Preview_"+file_name+".txt"
-        filename = "Preview" + ".txt"
+        filename = "Preview.txt"
 
         if filename not in bpy.data.texts:
             bpy.data.texts.new(filename)  # New document in Text Editor
@@ -74,21 +74,21 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
 
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Scene Heading':
-                bpy.data.texts[filename].write(f.element_text+chr(10))
+                bpy.data.texts[filename].write(f.scene_abbreviation + " " + (f.element_text).upper() + chr(10))
             if f.element_type == 'Action':
                 action = f.element_text
                 action_list = action_wrapper.wrap(text=action)
-                for element in action_list:
-                    bpy.data.texts[filename].write(element+chr(10))
+                for action in action_list:
+                    bpy.data.texts[filename].write(action+chr(10))
             if f.element_type == 'Character':
-                bpy.data.texts[filename].write((f.element_text).center(60)+chr(10))
+                bpy.data.texts[filename].write(((f.element_text).upper()).center(60)+chr(10))
             if f.element_type == 'Parenthetical':
-                bpy.data.texts[filename].write((f.element_text).center(60)+chr(10))
+                bpy.data.texts[filename].write(((f.element_text).lower()).center(60)+chr(10))
             if f.element_type == 'Dialogue':
                 dialogue = f.element_text
                 line_list = dialogue_wrapper.wrap(text=dialogue)
-                for element in line_list:
-                    bpy.data.texts[filename].write((" "*13+element)+chr(10))
+                for dialogue in line_list:
+                    bpy.data.texts[filename].write((" "*13+dialogue)+chr(10))
             elif f.element_type == 'Synopsis':          # Ignored by Fountain formatting
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Page Break':
@@ -103,7 +103,11 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 bpy.data.texts[filename].write(f.element_text.rjust(60)+chr(10))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
-
+            # if current_line < f.original_line:
+                # jump_to_line = bpy.data.texts[filename].line_number
+  
+            # bpy.data.texts[filename].jump(line = jump_to_line)
+        
         return {"FINISHED"}
 
 def get_mergables(areas):
@@ -215,6 +219,11 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             override['space_data'] = area.spaces.active
             override['space_data'].text = bpy.data.texts['Preview.txt']
             override['space_data'].show_region_ui = False
+            override['space_data'].show_region_header = False
+            override['space_data'].show_region_footer = False
+            override['space_data'].show_line_numbers = False
+            override['space_data'].show_syntax_highlight = False
+            override['space_data'].show_word_wrap = False
 
             for area in context.screen.areas:
                 if area not in arealist:
@@ -252,8 +261,7 @@ def text_handler(spc, context):
         scene.last_line = line
         scene.last_line_index = text.current_line_index
 
-    if line != bpy.context.scene.last_line and len(line) > len(
-            bpy.context.scene.last_line):
+    if line != bpy.context.scene.last_line or len(line) > len(bpy.context.scene.last_line):
         bpy.ops.scene.preview_fountain()
 
     scene.last_line = line
