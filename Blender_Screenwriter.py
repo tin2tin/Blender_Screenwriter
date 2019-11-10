@@ -1,6 +1,6 @@
 bl_info = {
     "name":
-    "Fountain Live Preview",
+    "Blender Screenwriter with Fountain Live Preview",
     "author": "tintwotin",
     "version": (0, 1),
     "blender": (2, 80, 0),
