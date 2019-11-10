@@ -57,12 +57,12 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
 
         F = fountain.Fountain(fountain_script)
 
-        if 'title' in F.metadata:
-            file_name = F.metadata['title'][0]
-        else:
-            file_name = "Fountain"
-        filename = "Preview_"+file_name+".txt"
-        #filename = "Preview" + ".txt"
+        # if 'title' in F.metadata:
+            # file_name = F.metadata['title'][0]
+        # else:
+            # file_name = "Fountain"
+        # filename = "Preview_"+file_name+".txt"
+        filename = "Preview" + ".txt"
 
         if filename not in bpy.data.texts:
             bpy.data.texts.new(filename)  # New document in Text Editor
