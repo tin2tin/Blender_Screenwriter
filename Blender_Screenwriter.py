@@ -1,11 +1,11 @@
 bl_info = {
     "name":
     "Blender Screenwriter with Fountain Live Preview",
-    "author": "Community, Fountain module by Manuel Senfft",
+    "author": "The Community & Fountain module by Manuel Senfft",
     "version": (0, 1),
     "blender": (2, 80, 0),
     "location": "Text Editor > Sidebar",
-    "description": "Adds functions for live editing of fountain file with live screenplay preview",
+    "description": "Adds functions for live editing of Fountain file with live screenplay preview",
     "warning": "Dual toggle will not work in 2.81 and 2.82!",
     "wiki_url": "",
     "category": "Text Editor",
@@ -31,7 +31,7 @@ class FOUNTAIN_PT_panel(bpy.types.Panel):
         layout = self.layout
 
         layout.operator("scene.preview_fountain")
-        layout.operator("areatype.trimview")
+        #layout.operator("text.dual_view")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
 
@@ -105,9 +105,9 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 bpy.data.texts[filename].write(chr(10))
             # if current_line < f.original_line:
                 # jump_to_line = bpy.data.texts[filename].line_number
-  
+
             # bpy.data.texts[filename].jump(line = jump_to_line)
-        
+        bpy.ops.text.dual_view()
         return {"FINISHED"}
 
 def get_mergables(areas):
@@ -152,8 +152,8 @@ def area_from_ptr(ptr):
             if area.as_pointer() == ptr:
                 return area
 
-class AREATYPE_OT_trim(bpy.types.Operator):
-    bl_idname = "areatype.trimview"
+class TEXT_OT_dual_view(bpy.types.Operator):
+    bl_idname = "text.dual_view"
     bl_label = "Dual View"
 
     @classmethod
@@ -307,7 +307,7 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
 def register():
     bpy.utils.register_class(FOUNTAIN_PT_panel)
     bpy.utils.register_class(FOUNTAIN_OT_preview_fountain)
-    bpy.utils.register_class(AREATYPE_OT_trim)
+    bpy.utils.register_class(TEXT_OT_dual_view)
 
     bpy.types.Scene.last_line = StringProperty(default="")
     bpy.types.Scene.last_line_index = IntProperty(default=0)
@@ -319,7 +319,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(FOUNTAIN_PT_panel)
     bpy.utils.unregister_class(FOUNTAIN_OT_preview_fountain)
-    bpy.utils.unregister_class(AREATYPE_OT_trim)
+    bpy.utils.unregister_class(TEXT_OT_dual_view)
 
     del bpy.types.Scene.last_line
     del bpy.types.Scene.last_line_index
