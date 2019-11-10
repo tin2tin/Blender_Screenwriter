@@ -197,8 +197,8 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             override['area'] = area
             override['space_data'] = area.spaces.active
 
-            for o in override:
-                print(o)
+            #for o in override:
+                #print(o)
                        # for region in area.regions:
                            # if region.type == '':
                                # break
