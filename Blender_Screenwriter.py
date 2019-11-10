@@ -11,7 +11,6 @@ bl_info = {
     "category": "Text Editor",
 }
 
-
 import bpy
 import textwrap
 import os
@@ -141,6 +140,7 @@ def split_area(window,screen,region,area,xtype,direction="VERTICAL",factor=0.5,m
     newarea.type = xtype
     return newarea
 
+
 def area_from_ptr(ptr):
     for screen in bpy.data.screens:
         for area in screen.areas:
@@ -178,18 +178,10 @@ class AREATYPE_OT_trim(bpy.types.Operator):
                 break
 
         if otherarea:  #leave trim-mode
-            #            print("this x: "+str(thisarea.x))   #min_x = left x of left window
-            #            print("this y: "+str(thisarea.y))   #min_y = mouse position, starting from window bottom y
-            #            print("other x: "+str(otherarea.x)) #max_x = x between left and right window
-            #            print("other y: "+str(otherarea.y)) #max_y = mouse position, starting from window bottom y
-
             #join BROKEN!!
-            #teardown(context)
-            #bpy.ops.screen.area_join(cursor=(otherarea.x + thisarea.width + 1, otherarea.y))#, max_x=otherarea.x, max_y=otherarea.y) #broken
-            bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y) #broken
+            bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y)
 
             # normal settings
-
             bpy.ops.screen.screen_full_area()
             bpy.ops.screen.screen_full_area()
             override = context.copy()
@@ -197,8 +189,8 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             override['area'] = area
             override['space_data'] = area.spaces.active
 
-            #for o in override:
-                #print(o)
+            for o in override:
+                print(o)
                        # for region in area.regions:
                            # if region.type == '':
                                # break
@@ -210,21 +202,15 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             areax = None
 
             #split
-                    
             window = context.window
             region = context.region
             screen = context.screen
             main = context.area
-            
+
             main.type = "TEXT_EDITOR"
-            
-            #ctrlPanel = split_area(window,screen,region,main,"TEXT_EDITOR",direction="VERTICAL",factor=0.5)            
-
             ctrlPanel = bpy.ops.screen.area_split(direction="VERTICAL")
-#            ctrlPanel.spaces[0].text = bpy.data.texts['Preview.txt']
-            #settings for preview 2.
 
-            # fit 1. preview to window
+            #settings for preview 2.
             bpy.ops.screen.screen_full_area()
             bpy.ops.screen.screen_full_area()
             override = original
@@ -232,23 +218,12 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             override['area'] = area
             override['space_data'] = area.spaces.active
             override['space_data'].text = bpy.data.texts['Preview.txt']
-            
+            override['space_data'].show_region_ui = False
+
             for area in context.screen.areas:
                 if area not in arealist:
                     areax = area
                     break
-
-
-#            for area in reversed(context.screen.areas):
-#                if area.type == "TEXT_EDITOR":
-#                    suffix = Path(area.space_data.text.filepath).suffix
-#                    if suffix == ".fountain":
-#                        area.space_data.text = bpy.data.texts['Preview.txt']
-#                        break
-#                else:
-#                    raise RuntimeError("Nothing found")
-
-#            bpy.context.space_data.text = bpy.data.texts['Preview.txt']
 
             msg = "Change text-block to Preview.txt in the new Text Editor area."
             self.report({'INFO'}, msg)
@@ -256,8 +231,6 @@ class AREATYPE_OT_trim(bpy.types.Operator):
             if areax:
                 areax.type = thistype
                 return {"FINISHED"}
-
-            #bpy.context.space_data.text = bpy.data.texts['Preview.txt']
 
         return {"CANCELLED"}
 
