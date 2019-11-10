@@ -1,7 +1,7 @@
 bl_info = {
     "name":
     "Blender Screenwriter with Fountain Live Preview",
-    "author": "tintwotin",
+    "author": "Community, Fountain module by Manuel Senfft",
     "version": (0, 1),
     "blender": (2, 80, 0),
     "location": "Text Editor > Sidebar",
