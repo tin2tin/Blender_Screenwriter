@@ -75,10 +75,9 @@ class Fountain:
             elif line[-1] == ':':
                 open_key = line[0:-1].lower()
                 self.metadata[open_key] = list()
-            # else: #error
-                # line.count(substring
-                # key, value = line.split(':', 1)
-                # self.metadata[key.strip().lower()] = [value.strip()]
+            else:
+                key, value = line.split(':', 1)
+                self.metadata[key.strip().lower()] = [value.strip()]
 
     def _parse_body(self, script_body):
         is_comment_block = False
