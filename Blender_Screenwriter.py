@@ -31,7 +31,7 @@ class FOUNTAIN_PT_panel(bpy.types.Panel):
         layout = self.layout
 
         layout.operator("scene.preview_fountain")
-        #layout.operator("text.dual_view")
+        layout.operator("text.dual_view")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
 
@@ -107,7 +107,7 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 # jump_to_line = bpy.data.texts[filename].line_number
 
             # bpy.data.texts[filename].jump(line = jump_to_line)
-        bpy.ops.text.dual_view()
+        #bpy.ops.text.dual_view()
         return {"FINISHED"}
 
 def get_mergables(areas):
