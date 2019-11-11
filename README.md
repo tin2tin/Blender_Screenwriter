@@ -9,7 +9,9 @@ In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be dis
 
 ### Test Screenplay Files
 https://fountain.io/_downloads/Big%20Fish.fountain
+
 https://fountain.io/_downloads/Brick%20&%20Steel.fountain
+
 https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 
 ### Fountain Syntax
