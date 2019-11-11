@@ -15,7 +15,7 @@ https://fountain.io/_downloads/Brick%20&%20Steel.fountain
 https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 
 ### Fountain Syntax
-https://github.com/derickc/Fountainhead
+https://github.com/derickc/Fountainhead#fountain-syntax
 
 ### About
 
