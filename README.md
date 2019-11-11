@@ -3,7 +3,7 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 
 ### How to
 
-Download the files and zip them, then use the normal Blender installation procedure.
+Download the files and zip them(downloading as zip will not install succesfully), then use the normal Blender installation procedure.
 
 In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you create a text-block with a .fountain extention or open .fountain a file. 
 
