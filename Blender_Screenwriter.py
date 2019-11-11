@@ -29,16 +29,19 @@ class FOUNTAIN_PT_panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-
-        layout.operator("scene.preview_fountain")
+        layout.use_property_split = True
+        layout.use_property_decorate = False
         layout.operator("text.dual_view")
+        layout.operator("scene.preview_fountain")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
+        #layout.operator("text.export_to_pdf")
 
 
 class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
+    '''Updates the preview'''
     bl_idname = "scene.preview_fountain"
-    bl_label = "Preview Screenplay"
+    bl_label = "Refresh"
 
     @classmethod
     def poll(cls, context):
@@ -55,7 +58,7 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
 
         # current_text = os.path.basename(bpy.context.space_data.text.filepath)
         # bpy.data.texts[current_text]
-        # current_line = bpy.data.texts[current_text].line_number
+        # current_line = bpy.data.texts[current_text].current_line_index
         # jump_to_line = 0
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
@@ -108,9 +111,9 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 bpy.data.texts[filename].write(chr(10))
                 
             # if current_line < f.original_line:
-                # jump_to_line = bpy.data.texts[filename].line_number
+                # jump_to_line = bpy.data.texts[filename].current_line_index
 
-            # bpy.data.texts[filename].jump(line = jump_to_line)
+            # bpy.ops.text.jump(line = jump_to_line)
         #bpy.ops.text.dual_view()
         return {"FINISHED"}
 
@@ -157,8 +160,9 @@ def area_from_ptr(ptr):
                 return area
 
 class TEXT_OT_dual_view(bpy.types.Operator):
+    '''Toggles screenplay preview'''
     bl_idname = "text.dual_view"
-    bl_label = "Dual View"
+    bl_label = "Preview"
 
     @classmethod
     def poll(cls, context):
@@ -268,13 +272,12 @@ def text_handler(spc, context):
     if not text:
         return
 
-    if scene.last_line is None or scene.last_line_index != text.current_line_index:
+    if scene.last_line is None and scene.last_line_index != text.current_line_index:
         scene.last_line = line
         scene.last_line_index = text.current_line_index
 
-    if line != bpy.context.scene.last_line or len(line) > len(bpy.context.scene.last_line):
+    if line != bpy.context.scene.last_line and len(line) > len(bpy.context.scene.last_line):
         bpy.ops.scene.preview_fountain()
-
     scene.last_line = line
 
 
@@ -315,39 +318,38 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
         default=False)
 
 
-# Currently unused code:
-"""If the screenplay code generates a scene per scene call, i.e. bpy.ops.scene.new ()
-then the code below will generate a scene strip and add every scene loaded as a scene strip clip."""
-class BR_OT_regenerate_scene_video(bpy.types.Operator): # by Bay Raitt
-    """Add video sequencer scene strips from all scenes"""
-    bl_idname = "view3d.regenerate_scene_video"
-    bl_label = "Regenerate Video"
+class TEXT_OT_export_to_pdf(bpy.types.Operator): # by Bay Raitt
+    """Add video sequencer scene strips from all screenplay scenes"""
+    bl_idname = "text.export_to_pdf"
+    bl_label = "Scenes to Strips"
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+
     def execute(self, context):
-        main_scene = bpy.context.scene
-        count = 0
-        original_type = bpy.context.area.type
+       
+        dir = os.path.dirname(bpy.data.filepath)
+        if not dir in sys.path:
+            sys.path.append(dir)
 
-        for a in bpy.context.screen.areas:
-            if a.type == 'SEQUENCE_EDITOR':
-                if a.spaces[0].view_type == 'SEQUENCER':  
-                    bpy.context.area.type ="SEQUENCE_EDITOR"
-                    for scene in bpy.data.scenes :
-                        if scene is not main_scene :
-                            bpy.ops.sequencer.scene_strip_add(frame_start=count, channel=1, scene=bpy.data.scenes[count].name)
-                            activeStrip = bpy.context.scene.sequence_editor.active_strip            
-                            bpy.context.scene.sequence_editor.sequences_all[activeStrip.name].frame_final_duration = 1
-                        count = count + 1
-                    bpy.context.area.type = original_type
+        fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
+
+        F = fountain.Fountain(fountain_script)
+
         return {'FINISHED'}
-
 
 
 def register():
     bpy.utils.register_class(FOUNTAIN_PT_panel)
     bpy.utils.register_class(FOUNTAIN_OT_preview_fountain)
     bpy.utils.register_class(TEXT_OT_dual_view)
+    bpy.utils.register_class(TEXT_OT_export_to_pdf)
 
     bpy.types.Scene.last_line = StringProperty(default="")
     bpy.types.Scene.last_line_index = IntProperty(default=0)
@@ -360,6 +362,7 @@ def unregister():
     bpy.utils.unregister_class(FOUNTAIN_PT_panel)
     bpy.utils.unregister_class(FOUNTAIN_OT_preview_fountain)
     bpy.utils.unregister_class(TEXT_OT_dual_view)
+    bpy.utils.unregister_class(TEXT_OT_export_to_pdf)
 
     del bpy.types.Scene.last_line
     del bpy.types.Scene.last_line_index
