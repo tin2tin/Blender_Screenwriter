@@ -22,7 +22,7 @@ from pathlib import Path
 
 class FOUNTAIN_PT_panel(bpy.types.Panel):
     """Preview fountain script as formatted screenplay"""
-    bl_label = "Fountain"
+    bl_label = "Screenwriter"
     bl_space_type = 'TEXT_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Text"
@@ -59,6 +59,7 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
         # jump_to_line = 0
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
 
         F = fountain.Fountain(fountain_script)
 
@@ -74,17 +75,19 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
 
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Scene Heading':
-                bpy.data.texts[filename].write(f.scene_abbreviation + " " + (f.element_text).upper() + chr(10))
-            if f.element_type == 'Action':
+                bpy.data.texts[filename].write(f.scene_abbreviation + " " + (f.element_text) + chr(10)) #.upper()
+            elif f.element_type == 'Action' and f.is_centered ==False:
                 action = f.element_text
                 action_list = action_wrapper.wrap(text=action)
                 for action in action_list:
                     bpy.data.texts[filename].write(action+chr(10))
-            if f.element_type == 'Character':
-                bpy.data.texts[filename].write(((f.element_text).upper()).center(60)+chr(10))
-            if f.element_type == 'Parenthetical':
-                bpy.data.texts[filename].write(((f.element_text).lower()).center(60)+chr(10))
-            if f.element_type == 'Dialogue':
+            elif f.element_type == 'Action' and f.is_centered == True:
+                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10))
+            elif f.element_type == 'Character':
+                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10)) # .upper()
+            elif f.element_type == 'Parenthetical':
+                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10)) # .lower()
+            elif f.element_type == 'Dialogue':
                 dialogue = f.element_text
                 line_list = dialogue_wrapper.wrap(text=dialogue)
                 for dialogue in line_list:
@@ -103,6 +106,7 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
                 bpy.data.texts[filename].write(f.element_text.rjust(60)+chr(10))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
+                
             # if current_line < f.original_line:
                 # jump_to_line = bpy.data.texts[filename].line_number
 
@@ -176,6 +180,16 @@ class TEXT_OT_dual_view(bpy.types.Operator):
 
         arealist = list(context.screen.areas)
 
+        filename = "Preview.txt"
+        if filename not in bpy.data.texts:
+            bpy.ops.scene.preview_fountain()
+            
+            fountain_script = bpy.context.area.spaces.active.text.as_string()            
+            if fountain_script.strip() == "":
+                msg = "Text-block can't be empty!"
+                self.report({'INFO'}, msg)
+                return {"CANCELLED"}            
+
         for area in context.screen.areas:
             if area == thisarea:
                 continue
@@ -229,9 +243,6 @@ class TEXT_OT_dual_view(bpy.types.Operator):
                 if area not in arealist:
                     areax = area
                     break
-
-            msg = "Change text-block to Preview.txt in the new Text Editor area."
-            self.report({'INFO'}, msg)
 
             if areax:
                 areax.type = thistype
@@ -302,6 +313,35 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
         description="Enables live screenplay preview",
         update=activate_handler,
         default=False)
+
+
+# Currently unused code:
+"""If the screenplay code generates a scene per scene call, i.e. bpy.ops.scene.new ()
+then the code below will generate a scene strip and add every scene loaded as a scene strip clip."""
+class BR_OT_regenerate_scene_video(bpy.types.Operator): # by Bay Raitt
+    """Add video sequencer scene strips from all scenes"""
+    bl_idname = "view3d.regenerate_scene_video"
+    bl_label = "Regenerate Video"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        main_scene = bpy.context.scene
+        count = 0
+        original_type = bpy.context.area.type
+
+        for a in bpy.context.screen.areas:
+            if a.type == 'SEQUENCE_EDITOR':
+                if a.spaces[0].view_type == 'SEQUENCER':  
+                    bpy.context.area.type ="SEQUENCE_EDITOR"
+                    for scene in bpy.data.scenes :
+                        if scene is not main_scene :
+                            bpy.ops.sequencer.scene_strip_add(frame_start=count, channel=1, scene=bpy.data.scenes[count].name)
+                            activeStrip = bpy.context.scene.sequence_editor.active_strip            
+                            bpy.context.scene.sequence_editor.sequences_all[activeStrip.name].frame_final_duration = 1
+                        count = count + 1
+                    bpy.context.area.type = original_type
+        return {'FINISHED'}
+
 
 
 def register():
