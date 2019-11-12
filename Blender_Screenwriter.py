@@ -13,12 +13,13 @@ bl_info = {
 
 import bpy
 import textwrap
+import subprocess
 import os
 import sys
 import fountain
 from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty
 from pathlib import Path
-
+#import fountain2pdf
 
 class FOUNTAIN_PT_panel(bpy.types.Panel):
     """Preview fountain script as formatted screenplay"""
@@ -35,7 +36,7 @@ class FOUNTAIN_PT_panel(bpy.types.Panel):
         layout.operator("scene.preview_fountain")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
-        #layout.operator("text.export_to_pdf")
+        #layout.operator("text.export_to_pdf") #not working yet
 
 
 class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
@@ -56,10 +57,8 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
         if not dir in sys.path:
             sys.path.append(dir)
 
-        # current_text = os.path.basename(bpy.context.space_data.text.filepath)
-        # bpy.data.texts[current_text]
-        # current_line = bpy.data.texts[current_text].current_line_index
-        # jump_to_line = 0
+        current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        bpy.data.texts[current_text]
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
         if fountain_script.strip() == "": return {"CANCELLED"}
@@ -73,32 +72,44 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
         else:
             bpy.data.texts[filename].clear()  # Clear existing text
 
-        action_wrapper = textwrap.TextWrapper(width=60)
-        dialogue_wrapper = textwrap.TextWrapper(width=37)
+        #the scroll lock becomes very unaccurate when there is a header of the left window 
+        current_line = bpy.data.texts[current_text].current_line_index-len(F.metadata) #F.metadata is not resulting in the correct number of lines. 
+        current_character = bpy.data.texts[current_text].current_character
+        jump_to_line = 0
+        margin = " "*4
+        document_width = 60+len(margin)
+        action_wrapper = textwrap.TextWrapper(width=document_width)
+        dialogue_wrapper = textwrap.TextWrapper(width=37+int(len(margin)/2))
+        dialogue_indentation = 13+int(len(margin)/2)
+        
+        # title stuff
+        # for meta in iter(F.metadata.items()):
+            # if meta[0] == 'title':
+                # bpy.data.texts[filename].write((str(meta[1])).center(document_width)+chr(10))
 
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Scene Heading':
-                bpy.data.texts[filename].write(f.scene_abbreviation + " " + (f.element_text) + chr(10)) #.upper()
+                bpy.data.texts[filename].write(margin+f.scene_abbreviation + " " + f.element_text + chr(10)) #.upper()
             elif f.element_type == 'Action' and f.is_centered ==False:
                 action = f.element_text
                 action_list = action_wrapper.wrap(text=action)
                 for action in action_list:
-                    bpy.data.texts[filename].write(action+chr(10))
+                    bpy.data.texts[filename].write(margin+action+chr(10))
             elif f.element_type == 'Action' and f.is_centered == True:
-                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10))
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10))
             elif f.element_type == 'Character':
-                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10)) # .upper()
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .upper()
             elif f.element_type == 'Parenthetical':
-                bpy.data.texts[filename].write(((f.element_text)).center(60)+chr(10)) # .lower()
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .lower()
             elif f.element_type == 'Dialogue':
                 dialogue = f.element_text
                 line_list = dialogue_wrapper.wrap(text=dialogue)
                 for dialogue in line_list:
-                    bpy.data.texts[filename].write((" "*13+dialogue)+chr(10))
+                    bpy.data.texts[filename].write(margin+(" "*dialogue_indentation+dialogue)+chr(10))
             elif f.element_type == 'Synopsis':          # Ignored by Fountain formatting
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Page Break':
-                bpy.data.texts[filename].write(chr(10)+("_"*60)+chr(10)+chr(10))
+                bpy.data.texts[filename].write(chr(10)+margin+("_"*action_wrapper)+chr(10))
             elif f.element_type == 'Boneyard':           # Ignored by Fountain formatting
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Comment':            # Ignored by Fountain formatting
@@ -106,14 +117,20 @@ class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
             elif f.element_type == 'Section Heading':    # Ignored by Fountain formatting
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Transition':
-                bpy.data.texts[filename].write(f.element_text.rjust(60)+chr(10))
+                bpy.data.texts[filename].write(margin+f.element_text.rjust(document_width)+chr(10))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
-                
-            # if current_line < f.original_line:
-                # jump_to_line = bpy.data.texts[filename].current_line_index
 
-            # bpy.ops.text.jump(line = jump_to_line)
+            #print("org "+str(f.original_line))
+            #print("cur "+str(current_line))
+            if current_line >= f.original_line and f.original_line != 0: #current_line
+                jump_to_line = bpy.data.texts[filename].current_line_index
+            
+        #print("Jump: "+str(jump_to_line))    
+        bpy.data.texts[filename].current_line_index = jump_to_line - 1
+        # Set cursor position in 2.81
+        # bpy.data.texts[filename].select_set(jump_to_line - 1, current_character, jump_to_line - 1, current_character + 1)
+ 
         #bpy.ops.text.dual_view()
         return {"FINISHED"}
 
@@ -174,7 +191,22 @@ class TEXT_OT_dual_view(bpy.types.Operator):
     original_area = None
 
     def execute(self, context):
+        main_scene = bpy.context.scene
+        count = 0
+        original_type = bpy.context.area.type
 
+        # # setting font (on Windows) not working
+        # try:
+            # for a in bpy.context.screen.areas:
+                # if a.type == 'PREFERENCES': 
+                    # bpy.context.area.type ="PREFERENCES"
+                    # bpy.context.preferences.view.font_path_ui_mono("C:\\Windows\\Fonts\\Courier.ttf")
+                    # break
+        # except RuntimeError as ex:
+            # error_report = "\n".join(ex.args)
+            # print("Caught error:", error_report)
+            # #pass
+        bpy.context.area.type = original_type
         self.original_area = context.area
         original = context.copy()
         thisarea = context.area
@@ -226,7 +258,7 @@ class TEXT_OT_dual_view(bpy.types.Operator):
             main = context.area
 
             main.type = "TEXT_EDITOR"
-            ctrlPanel = bpy.ops.screen.area_split(direction="VERTICAL")
+            ctrlPanel = bpy.ops.screen.area_split(direction="VERTICAL")#, factor=0.7)
 
             #settings for preview 2.
             bpy.ops.screen.screen_full_area()
@@ -318,10 +350,11 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
         default=False)
 
 
-class TEXT_OT_export_to_pdf(bpy.types.Operator): # by Bay Raitt
+# NOT WORKING - THE FONT IS TOO LARGE AND IN THE WRONG STYLE # NB. needs Reportlab and a custom fountain2pdf file. 
+class TEXT_OT_export_to_pdf(bpy.types.Operator):
     """Add video sequencer scene strips from all screenplay scenes"""
     bl_idname = "text.export_to_pdf"
-    bl_label = "Scenes to Strips"
+    bl_label = "Export to PDF"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -340,8 +373,22 @@ class TEXT_OT_export_to_pdf(bpy.types.Operator): # by Bay Raitt
         fountain_script = bpy.context.area.spaces.active.text.as_string()
         if fountain_script.strip() == "": return {"CANCELLED"}
 
-        F = fountain.Fountain(fountain_script)
+        old_filename = bpy.context.space_data.text.filepath
+        bpy.types.Scene.codestyle_name = old_filename
+        filename = bpy.utils.script_path_user() + "\\addons\\screenplay.txt"
+        bpy.ops.text.save_as(filepath=filename, check_existing=False)
 
+        cmd = chr(34)+bpy.utils.script_path_user()+"\\addons\\fountain2pdf.pdf"+chr(34)+' "%s"' % (filename)
+        print(cmd)
+        process = subprocess.Popen(cmd,
+                                   shell=True,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        o, e = process.communicate()
+        print(o, e)
+
+        bpy.context.space_data.text.filepath = old_filename
         return {'FINISHED'}
 
 
