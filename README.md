@@ -7,6 +7,8 @@ Download the files and zip them(downloading as zip will not install succesfully)
 
 In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you create a text-block with a .fountain extention or open .fountain a file. 
 
+Change the font in Preferences > Interface > Text Rendering > Mono-Space Font to Courier or Courier Prime: https://quoteunquoteapps.com/courierprime/
+
 ### Test Screenplay Files
 https://fountain.io/_downloads/Big%20Fish.fountain
 
