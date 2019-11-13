@@ -1,376 +1,488 @@
-"""
-fountain.py
-Ported to Python 3 by Colton J. Provias - cj@coltonprovias.com
-Original Python code at https://gist.github.com/ColtonProvias/8232624
-Based on Fountain by Nima Yousefi & John August
-Original code for Objective-C at https://github.com/nyousefi/Fountain
-Further Edited by Manuel Senfft
-"""
+bl_info = {
+    "name":
+    "Blender Screenwriter with Fountain Live Preview",
+    "author": "The Community & Fountain module by Manuel Senfft",
+    "version": (0, 1),
+    "blender": (2, 81, 0),
+    "location": "Text Editor > Sidebar",
+    "description": "Adds functions for editing of Fountain file with live screenplay preview",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Text Editor",
+}
+
+import bpy
+import textwrap
+import subprocess
+import os
+import sys
+import fountain
+from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty
+from pathlib import Path
+#import fountain2pdf
+from pathlib import Path
+
+def get_mergables(areas):
+    xs,ys = dict(),dict()
+    for a in areas:
+        xs[a.x] = a
+        ys[a.y] = a
+    for area in reversed(areas):
+        tx = area.x + area.width + 1
+        ty = area.y + area.height + 1
+        if tx in xs and xs[tx].y == area.y and xs[tx].height == area.height:
+            return area,xs[tx]
+        elif ty in ys and ys[ty].x == area.x and ys[ty].width == area.width:
+            return area,ys[ty]
+    return None,None
+
+def teardown(context):
+    while len(context.screen.areas) > 1:
+        a,b = get_mergables(context.screen.areas)
+        if a and b:
+            bpy.ops.screen.area_join(cursor=(a.x,a.y))#,max_x=b.x,max_y=b.y)
+            area = context.screen.areas[0]
+            region = area.regions[0]
+            blend_data = context.blend_data
+            bpy.ops.screen.screen_full_area(dict(screen=context.screen,window=context.window,region=region,area=area,blend_data=blend_data))
+            bpy.ops.screen.back_to_previous(dict(screen=context.screen,window=context.window,region=region,area=area,blend_data=blend_data))
 
 
-COMMON_TRANSITIONS = {'FADE OUT.', 'CUT TO BLACK.', 'FADE TO BLACK.'}
+def split_area(window,screen,region,area,xtype,direction="VERTICAL",factor=0.5,mouse_x=-100,mouse_y=-100):
+    beforeptrs = set(list((a.as_pointer() for a in screen.areas)))
+    bpy.ops.screen.area_split(dict(region=region,area=area,screen=screen,window=window),direction=direction,factor=factor)
+    afterptrs = set(list((a.as_pointer() for a in screen.areas)))
+    newareaptr = list(afterptrs-beforeptrs)
+    newarea = area_from_ptr(newareaptr[0])
+    newarea.type = xtype
+    return newarea
 
 
-class FountainElement:
-    def __init__(
-        self,
-        element_type,
-        element_text='',
-        section_depth=0,
-        scene_number='',
-        is_centered=False,
-        is_dual_dialogue=False,
-        original_line=0,
-        scene_abbreviation='.',
-        original_content=''
-    ):
-        self.element_type = element_type
-        self.element_text = element_text
-        self.section_depth = section_depth
-        self.scene_number = scene_number
-        self.scene_abbreviation = scene_abbreviation
-        self.is_centered = is_centered
-        self.is_dual_dialogue = is_dual_dialogue
-        self.original_line = original_line
-        self.original_content = original_content
-
-    def __repr__(self):
-        return self.element_type + ': ' + self.element_text
+def area_from_ptr(ptr):
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            if area.as_pointer() == ptr:
+                return area
 
 
-class Fountain:
-    def __init__(self, string=None, path=None):
-        self.metadata = dict()
-        self.elements = list()
+class SCREENWRITER_PT_panel(bpy.types.Panel):
+    """Preview fountain script as formatted screenplay"""
+    bl_label = "Screenwriter"
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Text"
 
-        if path:
-            with open(path) as fp:
-                self.contents = fp.read()
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout.operator("text.dual_view")
+        layout.operator("scene.preview_fountain")
+        repl = context.scene.text_replace
+        layout.prop(repl, "enabled")
+        #layout.operator("text.export_to_pdf") #not working
+
+
+class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
+    '''Updates the preview'''
+    bl_idname = "scene.preview_fountain"
+    bl_label = "Refresh"
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+
+    def execute(self, context):
+        space = bpy.context.space_data
+        dir = os.path.dirname(bpy.data.filepath)
+        if not dir in sys.path:
+            sys.path.append(dir)
+
+        current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        if current_text.strip() == "": return
+
+        fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
+
+        F = fountain.Fountain(fountain_script)
+
+        filename = "Preview.txt"
+
+        if filename not in bpy.data.texts:
+            bpy.data.texts.new(filename)  # New document in Text Editor
         else:
-            self.contents = string
-        if self.contents != '':
-            self.parse()
+            bpy.data.texts[filename].clear()  # Clear existing text
+            
+        lines = fountain_script.split('\n\n')
+        lines = lines[0].splitlines()
+        
+        current_line = bpy.data.texts[current_text].current_line_index - len(lines)-1
+        current_character = bpy.data.texts[current_text].current_character
+        jump_to_line = 0
+        margin = " "*4
+        document_width = 60+len(margin)
+        action_wrapper = textwrap.TextWrapper(width=document_width)
+        dialogue_wrapper = textwrap.TextWrapper(width=37+int(len(margin)/2))
+        dialogue_indentation = 13+int(len(margin)/2)
+        cursor_indentation = margin
+        add_lines = 0#int(document_width/current_character)
+        add_characters = current_character
+        cursor_indentation_actual = ""
+        text = bpy.context.area.spaces.active.text
+        current_line_length = len(text.current_line.body)
+        add_lines_actual = 0
+        add_characters_actual = 0
+        
+        # title stuff
+        # for meta in iter(F.metadata.items()):
+            # if meta[0] == 'title':
+                # bpy.data.texts[filename].write((str(meta[1])).center(document_width)+chr(10))
 
-    def parse(self):
-        contents = self.contents.strip().replace('\r', '')
+        for fc, f in enumerate(F.elements):
+            add_lines = -1#int(document_width/current_character)
+            add_characters = current_character
+            if f.element_type == 'Scene Heading':
+                bpy.data.texts[filename].write(margin+f.scene_abbreviation + " " + f.element_text + chr(10)) #.upper()
+                cursor_indentation = margin
+            elif f.element_type == 'Action' and f.is_centered ==False:
+                action = f.element_text
+                action_list = action_wrapper.wrap(text=action)
+                
+                for action in action_list:
+                    bpy.data.texts[filename].write(margin+action+chr(10))
+                    # if add_characters >= len(action): 
+                        # add_characters = add_characters-len(action)
+                        # add_lines += 1
+                        # print("chr "+str(add_characters)+"  -  Add lines "+str(add_lines))
+                # add_lines = len(action_list) - add_lines 
+                cursor_indentation = margin
+            elif f.element_type == 'Action' and f.is_centered == True:
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10))
+                cursor_indentation = margin + ("_"*(int((document_width/2-len(f.element_text)/2))-2))
+            elif f.element_type == 'Character':
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .upper()
+                cursor_indentation = margin + ("_"*((f.element_text.center(document_width)).find(f.element_text)))
+            elif f.element_type == 'Parenthetical':
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .lower()
+                cursor_indentation = margin + ("_"*int((document_width/2-len(f.element_text)/2)))
+            elif f.element_type == 'Dialogue':
+                dialogue = f.element_text
+                current_character
+                line_list = dialogue_wrapper.wrap(text=dialogue)
+                for dialogue in line_list:
+                    bpy.data.texts[filename].write(margin+(" "*dialogue_indentation+dialogue)+chr(10))
+                    # if add_characters >= len(dialogue):
+                        # add_characters = add_characters-len(dialogue)
+                        # add_lines += 1
+                cursor_indentation = margin + (" "*dialogue_indentation)# + (" "*add_characters)
+            elif f.element_type == 'Synopsis':          # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Page Break':
+                bpy.data.texts[filename].write(chr(10)+margin+("_"*document_width)+chr(10))
+            elif f.element_type == 'Boneyard':           # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Comment':            # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Section Heading':    # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Transition':
+                bpy.data.texts[filename].write(margin+f.element_text.rjust(document_width)+chr(10))
+                cursor_indentation = margin + ("_"*(document_width-len(f.element_text)))
+            elif f.element_type == 'Empty Line':
+                bpy.data.texts[filename].write(chr(10))
 
-        contents_has_metadata = ':' in contents.splitlines()[0]
-        contents_has_body = '\n\n' in contents
+            #print("org "+str(f.original_line))
+            #print("cur "+str(current_line))
+            if current_line >= f.original_line and f.original_line != 0: #current_line
+                jump_to_line = bpy.data.texts[filename].current_line_index
+                cursor_indentation_actual = cursor_indentation
+                #add_lines_actual = add_lines
+                #print("add line: "+str(add_lines_actual))
+                #add_characters_actual = add_characters
+        #print("Jump: "+str(jump_to_line))    
 
-        if contents_has_metadata and contents_has_body:
-            script_head, script_body = contents.split('\n\n', 1)
-            self._parse_head(script_head.splitlines())
-            self._parse_body(script_body.splitlines())
-        elif contents_has_metadata and not contents_has_body:
-            self._parse_head(contents.splitlines())
-        else:
-            self._parse_body(contents.splitlines())
+        line = jump_to_line -1 #- add_lines_actual
+        if line < 0: line = 0
+        bpy.data.texts[filename].current_line_index = line
+        cur = current_character + len(cursor_indentation_actual) #+ add_characters_actual
+        bpy.data.texts[filename].select_set(line, cur, line, cur)
+ 
+        return {"FINISHED"}
 
-    def _parse_head(self, script_head):
-        open_key = None
-        for line in script_head:
-            line = line.rstrip()
-            if line[0].isspace():
-                self.metadata[open_key].append(line.strip())
-            elif line[-1] == ':':
-                open_key = line[0:-1].lower()
-                self.metadata[open_key] = list()
-            else:
-                key, value = line.split(':', 1)
-                self.metadata[key.strip().lower()] = [value.strip()]
 
-    def _parse_body(self, script_body):
-        is_comment_block = False
-        is_inside_dialogue_block = False
-        newlines_before = 0
-        index = -1
-        comment_text = list()
+class TEXT_OT_dual_view(bpy.types.Operator):
+    '''Toggles screenplay preview'''
+    bl_idname = "text.dual_view"
+    bl_label = "Preview"
 
-        for linenum, line in enumerate(script_body):
-            assert type(line) is str
-            index += 1
-            line = line.lstrip()
-            full_strip = line.strip()
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
 
-            if (not line or line.isspace()) and not is_comment_block:
-                self.elements.append(FountainElement('Empty Line'))
-                is_inside_dialogue_block = False
-                newlines_before += 1
+    original_area = None
+
+    def execute(self, context):
+        main_scene = bpy.context.scene
+        count = 0
+        original_type = bpy.context.area.type
+
+        # # setting font (on Windows) not working
+        # try:
+            # for a in bpy.context.screen.areas:
+                # if a.type == 'PREFERENCES': 
+                    # bpy.context.area.type ="PREFERENCES"
+                    # bpy.context.preferences.view.font_path_ui_mono("C:\\Windows\\Fonts\\Courier.ttf")
+                    # break
+        # except RuntimeError as ex:
+            # error_report = "\n".join(ex.args)
+            # print("Caught error:", error_report)
+            # #pass
+        bpy.context.area.type = original_type
+        self.original_area = context.area
+        original = context.copy()
+        thisarea = context.area
+        otherarea = None
+        tgxvalue = thisarea.x + thisarea.width + 1
+        thistype = context.area.type
+
+        arealist = list(context.screen.areas)
+
+        filename = "Preview.txt"
+        if filename not in bpy.data.texts:
+            bpy.ops.scene.preview_fountain()
+            
+            fountain_script = bpy.context.area.spaces.active.text.as_string()            
+            if fountain_script.strip() == "":
+                msg = "Text-block can't be empty!"
+                self.report({'INFO'}, msg)
+                return {"CANCELLED"}            
+
+        for area in context.screen.areas:
+            if area == thisarea:
                 continue
+            elif area.x == tgxvalue and area.y == thisarea.y:
+                otherarea = area
+                break
 
-            if line.startswith('/*'):
-                line = line.rstrip()
-                if line.endswith('*/'):
-                    text = line.replace('/*', '').replace('*/', '')
-                    self.elements.append(
-                        FountainElement(
-                            'Boneyard',
-                            text,
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                    is_comment_block = False
-                    newlines_before = 0
-                else:
-                    is_comment_block = True
-                    comment_text.append('')
-                continue
+        if otherarea:  #leave trim-mode
 
-            if line.rstrip().endswith('*/'):
-                text = line.replace('*/', '')
-                comment_text.append(text.strip())
-                self.elements.append(
-                    FountainElement(
-                        'Boneyard',
-                        '\n'.join(comment_text),
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                is_comment_block = False
-                comment_text = list()
-                newlines_before = 0
-                continue
+            #bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y) # Use this for 2.80
+            bpy.ops.screen.area_join('INVOKE_DEFAULT', cursor=(otherarea.x, otherarea.y+int(otherarea.height/2)))
+            
+            # normal settings
+            bpy.ops.screen.screen_full_area()
+            bpy.ops.screen.screen_full_area()
+            override = context.copy()
+            area = self.original_area
+            override['area'] = area
+            override['space_data'] = area.spaces.active
 
-            if is_comment_block:
-                comment_text.append(line)
-                continue
+            return {"FINISHED"}
 
-            if line.startswith('==='):
-                self.elements.append(
-                    FountainElement(
-                        'Page Break',
-                        line,
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                newlines_before = 0
-                continue
+        else:  # enter dual-mode
 
-            if len(full_strip) > 0 and full_strip[0] == '=':
-                self.elements.append(
-                    FountainElement(
-                        'Synopsis',
-                        full_strip[1:].strip(),
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                continue
+            areax = None
 
-            if (
-                newlines_before > 0 and
-                full_strip.startswith('[[') and
-                full_strip.endswith(']]')
-            ):
-                self.elements.append(
-                    FountainElement(
-                        'Comment',
-                        full_strip.strip('[] \t'),
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                continue
+            #split
+            window = context.window
+            region = context.region
+            screen = context.screen
+            main = context.area
 
-            if len(full_strip) > 0 and full_strip[0] == '#':
-                newlines_before = 0
-                depth = full_strip.split()[0].count('#')
-                self.elements.append(
-                    FountainElement(
-                        'Section Heading',
-                        full_strip[depth:],
-                        section_depth=depth,
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                continue
+            main.type = "TEXT_EDITOR"
+            ctrlPanel = bpy.ops.screen.area_split(direction="VERTICAL")#, factor=0.7)
 
-            if len(line) > 1 and line[0] == '.' and line[1] != '.':
-                newlines_before = 0
-                if full_strip[-1] == '#' and full_strip.count('#') > 1:
-                    scene_number_start = len(full_strip) - \
-                        full_strip[::-1].find('#', 1) - 1
-                    self.elements.append(
-                        FountainElement(
-                            'Scene Heading',
-                            full_strip[1:scene_number_start].strip(),
-                            scene_number=full_strip[
-                                scene_number_start:
-                            ].strip('#').strip(),
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                else:
-                    self.elements.append(
-                        FountainElement(
-                            'Scene Heading',
-                            full_strip[1:].strip(),
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                continue
+            #settings for preview 2.
+            bpy.ops.screen.screen_full_area()
+            bpy.ops.screen.screen_full_area()
+            override = original
+            area = self.original_area
+            override['area'] = area
+            override['space_data'] = area.spaces.active
+            override['space_data'].text = bpy.data.texts['Preview.txt']
+            override['space_data'].show_region_ui = False
+            override['space_data'].show_region_header = False
+            override['space_data'].show_region_footer = False
+            override['space_data'].show_line_numbers = False
+            override['space_data'].show_syntax_highlight = False
+            override['space_data'].show_word_wrap = False
 
-            if (
-                line[0:4].upper() in
-                ['INT ', 'INT.', 'EXT ', 'EXT.', 'EST ', 'EST.', 'I/E ', 'I/E.'] or
-                line[0:8].upper() in ['INT/EXT ', 'INT/EXT.'] or
-                line[0:9].upper() in ['INT./EXT ', 'INT./EXT.']
-            ):
-                newlines_before = 0
-                scene_name_start = line.find(line.split()[1])
-                if full_strip[-1] == '#' and full_strip.count('#') > 1:
-                    scene_number_start = len(full_strip) - \
-                        full_strip[::-1].find('#', 1) - 1
-                    self.elements.append(
-                        FountainElement(
-                            'Scene Heading',
-                            full_strip[
-                                scene_name_start:scene_number_start
-                            ].strip(),
-                            scene_number=full_strip[
-                                scene_number_start:
-                            ].strip('#').strip(),
-                            original_line=linenum,
-                            scene_abbreviation=line.split()[0],
-                            original_content=line
-                        )
-                    )
-                else:
-                    self.elements.append(
-                        FountainElement(
-                            'Scene Heading',
-                            full_strip[scene_name_start:].strip(),
-                            original_line=linenum,
-                            scene_abbreviation=line.split()[0],
-                            original_content=line
-                        )
-                    )
-                continue
+            for area in context.screen.areas:
+                if area not in arealist:
+                    areax = area
+                    break
 
-            if full_strip.endswith(' TO:'):
-                newlines_before = 0
-                self.elements.append(
-                    FountainElement(
-                        'Transition',
-                        full_strip,
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                continue
+            if areax:
+                areax.type = thistype
+                return {"FINISHED"}
 
-            if full_strip in COMMON_TRANSITIONS:
-                newlines_before = 0
-                self.elements.append(
-                    FountainElement(
-                        'Transition',
-                        full_strip,
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                continue
+        return {"CANCELLED"}
 
-            if full_strip[0] == '>':
-                newlines_before = 0
-                if len(full_strip) > 1 and full_strip[-1]:
-                    self.elements.append(
-                        FountainElement(
-                            'Action',
-                            full_strip[1:-1].strip(),
-                            is_centered=True,
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                else:
-                    self.elements.append(
-                        FountainElement(
-                            'Transition',
-                            full_strip[1:].strip(),
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                continue
+handler = None
 
-            if (
-                newlines_before > 0 and
-                index + 1 < len(script_body) and
-                script_body[index + 1] and
-                not line[0] in ['[', ']', ',', '(', ')']
-            ):
-                newlines_before = 0
-                if full_strip[-1] == '^':
-                    for element in reversed(self.elements):
-                        if element.element_type == 'Character':
-                            element.is_dual_dialogue = True
-                            break
-                    self.elements.append(
-                        FountainElement(
-                            'Character',
-                            full_strip.rstrip('^').strip(),
-                            is_dual_dialogue=True,
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                    is_inside_dialogue_block = True
-                else:
-                    self.elements.append(
-                        FountainElement(
-                            'Character',
-                            full_strip,
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                    is_inside_dialogue_block = True
-                continue
 
-            if is_inside_dialogue_block:
-                if newlines_before == 0 and full_strip[0] == '(':
-                    self.elements.append(
-                        FountainElement(
-                            'Parenthetical',
-                            full_strip,
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
-                else:
-                    if self.elements[-1].element_type == 'Dialogue':
-                        self.elements[-1].element_text = '\n'.join(
-                            [self.elements[-1].element_text, full_strip]
-                        )
-                    else:
-                        self.elements.append(
-                            FountainElement(
-                                'Dialogue',
-                                full_strip,
-                                original_line=linenum,
-                                original_content=line
-                            )
-                        )
-                continue
+def get_space(context):
+    for area in context.screen.areas:
+        if area.type == "TEXT_EDITOR":
+            return area.spaces.active
 
-            if newlines_before == 0 and len(self.elements) > 0:
-                self.elements[-1].element_text = '\n'.join(
-                    [self.elements[-1].element_text, full_strip])
-                newlines_before = 0
-            else:
-                self.elements.append(
-                    FountainElement(
-                        'Action',
-                        full_strip,
-                        original_line=linenum,
-                        original_content=line
-                    )
-                )
-                newlines_before = 0
+
+def text_handler(spc, context):
+
+    scene = bpy.context.scene
+    text = bpy.context.area.spaces.active.text
+    line = text.current_line.body
+    current_text = os.path.basename(bpy.context.space_data.text.filepath)
+    if current_text.strip() == "": return
+    current_character = bpy.data.texts[current_text].current_character
+
+    if not text:
+        return
+
+    if scene.last_line is None and scene.last_line_index != text.current_line_index:
+        scene.last_line = line
+        scene.last_line_index = text.current_line_index
+
+    if scene.last_character is None:# scene.last_character != current_character:
+        scene.last_character = current_character
+
+    if line != scene.last_line or len(line) != len(scene.last_line):
+        bpy.ops.scene.preview_fountain()
+    elif current_character != scene.last_character:
+        bpy.ops.scene.preview_fountain()
+        
+    scene.last_line = line
+    scene.last_character = current_character    
+
+
+def redraw(context):
+    for window in context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'TEXT_EDITOR':
+                area.tag_redraw()
+
+
+def activate_handler(self, context):
+    global handler
+
+    spc = get_space(context)
+    if not spc:
+        return
+
+    enabled = context.scene.text_replace.enabled
+
+    if enabled:
+        handler = spc.draw_handler_add(text_handler, (
+            spc,
+            context,
+        ), "WINDOW", "POST_PIXEL")
+        print("handler activated", handler)
+    else:
+        if handler is not None:
+            spc.draw_handler_remove(handler, "WINDOW")
+        handler = None
+        print("handler deactivated")
+
+
+class TextReplaceProperties(bpy.types.PropertyGroup):
+    enabled: BoolProperty(
+        name="Live Preview",
+        description="Enables live screenplay preview",
+        update=activate_handler,
+        default=False)
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+                
+    def execute(self, context):
+        return {"FINISHED"}
+
+# NOT WORKING - THE FONT IS TOO LARGE AND IN THE WRONG STYLE # NB. needs Reportlab and a custom fountain2pdf file. 
+class TEXT_OT_export_to_pdf(bpy.types.Operator):
+    """Add video sequencer scene strips from all screenplay scenes"""
+    bl_idname = "text.export_to_pdf"
+    bl_label = "Export to PDF"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+
+    def execute(self, context):
+       
+        dir = os.path.dirname(bpy.data.filepath)
+        if not dir in sys.path:
+            sys.path.append(dir)
+
+        fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
+
+        old_filename = bpy.context.space_data.text.filepath
+        bpy.types.Scene.codestyle_name = old_filename
+        filename = bpy.utils.script_path_user() + "\\addons\\screenplay.fountain"
+        bpy.ops.text.save_as(filepath=filename, check_existing=False)
+        base = os.path.splitext(filename)[0]
+        pdf_filename = filename
+        pdf_filename = Path(pdf_filename).stem + '.pdf'
+        if os.path.isfile(pdf_filename): os.remove(pdf_filename)
+        cmd = chr(34)+bpy.utils.script_path_user()+"\\addons\\fountain2pdf.py"+chr(34)+' "%s"' % (filename)
+        print(cmd)
+        process = subprocess.Popen(cmd,
+                                   shell=True,
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        o, e = process.communicate()
+        print(o, e)
+
+        bpy.context.space_data.text.filepath = old_filename
+        return {'FINISHED'}
+
+
+def register():
+    bpy.utils.register_class(SCREENWRITER_PT_panel)
+    bpy.utils.register_class(SCREENWRITER_OT_preview_fountain)
+    bpy.utils.register_class(TEXT_OT_dual_view)
+    bpy.utils.register_class(TEXT_OT_export_to_pdf)
+
+    bpy.types.Scene.last_character = IntProperty(default=0)
+    bpy.types.Scene.last_line = StringProperty(default="")
+    bpy.types.Scene.last_line_index = IntProperty(default=0)
+
+    bpy.utils.register_class(TextReplaceProperties)
+    bpy.types.Scene.text_replace = PointerProperty(type=TextReplaceProperties)
+
+
+def unregister():
+    bpy.utils.unregister_class(SCREENWRITER_PT_panel)
+    bpy.utils.unregister_class(SCREENWRITER_OT_preview_fountain)
+    bpy.utils.unregister_class(TEXT_OT_dual_view)
+    bpy.utils.unregister_class(TEXT_OT_export_to_pdf)
+
+    del bpy.types.Scene.last_character
+    del bpy.types.Scene.last_line
+    del bpy.types.Scene.last_line_index
+
+    bpy.utils.unregister_class(TextReplaceProperties)
+    del bpy.types.Scene.text_replace
+
+
+if __name__ == "__main__":
+    register()
