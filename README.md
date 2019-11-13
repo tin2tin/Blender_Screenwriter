@@ -1,4 +1,4 @@
-# Blender Screenwriter
+# Blender_Screenwriter
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
 ### How to
@@ -6,12 +6,6 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 Download the files and zip them(downloading as zip will not install succesfully), then use the normal Blender installation procedure.
 
 In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you create a text-block with a .fountain extention or open .fountain a file. 
-
-Change the font in Preferences > Interface > Text Rendering > Mono-Space Font to Courier or Courier Prime: https://quoteunquoteapps.com/courierprime/
-
-### Contribute
-There are a number of features to add and bugs to fix in the issues: https://github.com/tin2tin/Blender_Screenwriter/issues
-
 
 ### Test Screenplay Files
 https://fountain.io/_downloads/Big%20Fish.fountain

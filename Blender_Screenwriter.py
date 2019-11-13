@@ -20,7 +20,7 @@ import fountain
 from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty
 from pathlib import Path
 #import fountain2pdf
-
+from pathlib import Path
 
 def get_mergables(areas):
     xs,ys = dict(),dict()
@@ -80,7 +80,7 @@ class FOUNTAIN_PT_panel(bpy.types.Panel):
         layout.operator("scene.preview_fountain")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
-        #layout.operator("text.export_to_pdf") #not working yet
+        #layout.operator("text.export_to_pdf") #not working
 
 
 class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
@@ -421,6 +421,7 @@ class TEXT_OT_export_to_pdf(bpy.types.Operator):
     def poll(cls, context):
         space = bpy.context.space_data
         filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
         return ((space.type == 'TEXT_EDITOR') and
                 Path(filepath).suffix == ".fountain")
 
@@ -435,10 +436,13 @@ class TEXT_OT_export_to_pdf(bpy.types.Operator):
 
         old_filename = bpy.context.space_data.text.filepath
         bpy.types.Scene.codestyle_name = old_filename
-        filename = bpy.utils.script_path_user() + "\\addons\\screenplay.txt"
+        filename = bpy.utils.script_path_user() + "\\addons\\screenplay.fountain"
         bpy.ops.text.save_as(filepath=filename, check_existing=False)
-
-        cmd = chr(34)+bpy.utils.script_path_user()+"\\addons\\fountain2pdf.pdf"+chr(34)+' "%s"' % (filename)
+        base = os.path.splitext(filename)[0]
+        pdf_filename = filename
+        pdf_filename = Path(pdf_filename).stem + '.pdf'
+        if os.path.isfile(pdf_filename): os.remove(pdf_filename)
+        cmd = chr(34)+bpy.utils.script_path_user()+"\\addons\\fountain2pdf.py"+chr(34)+' "%s"' % (filename)
         print(cmd)
         process = subprocess.Popen(cmd,
                                    shell=True,

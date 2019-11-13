@@ -1,24 +1,15 @@
 """
 fountain.py
 Ported to Python 3 by Colton J. Provias - cj@coltonprovias.com
+Original Python code at https://gist.github.com/ColtonProvias/8232624
 Based on Fountain by Nima Yousefi & John August
 Original code for Objective-C at https://github.com/nyousefi/Fountain
 Further Edited by Manuel Senfft
 """
 
-bl_info = {
-    "name": "Fountain Module",
-    "author": "Fountain by Nima Yousefi & John August, ported by Colton J. Provias and further edited by Manuel Senfft",
-    "version": (0, 1),
-    "blender": (2, 80, 0),
-    "location": "",
-    "description": "",
-    "warning": "",
-    "wiki_url": "",
-    "category": "Text Editor",
-}
 
 COMMON_TRANSITIONS = {'FADE OUT.', 'CUT TO BLACK.', 'FADE TO BLACK.'}
+
 
 class FountainElement:
     def __init__(
@@ -49,20 +40,29 @@ class FountainElement:
 
 class Fountain:
     def __init__(self, string=None, path=None):
+        self.metadata = dict()
+        self.elements = list()
+
         if path:
             with open(path) as fp:
                 self.contents = fp.read()
         else:
             self.contents = string
-        self.parse()
+        if self.contents != '':
+            self.parse()
 
     def parse(self):
-        self.metadata = dict()
         contents = self.contents.strip().replace('\r', '')
-        if ':' in contents.splitlines()[0]:
+
+        contents_has_metadata = ':' in contents.splitlines()[0]
+        contents_has_body = '\n\n' in contents
+
+        if contents_has_metadata and contents_has_body:
             script_head, script_body = contents.split('\n\n', 1)
             self._parse_head(script_head.splitlines())
             self._parse_body(script_body.splitlines())
+        elif contents_has_metadata and not contents_has_body:
+            self._parse_head(contents.splitlines())
         else:
             self._parse_body(contents.splitlines())
 
@@ -84,7 +84,6 @@ class Fountain:
         is_inside_dialogue_block = False
         newlines_before = 0
         index = -1
-        self.elements = list()
         comment_text = list()
 
         for linenum, line in enumerate(script_body):
