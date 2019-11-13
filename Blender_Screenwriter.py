@@ -3,10 +3,10 @@ bl_info = {
     "Blender Screenwriter with Fountain Live Preview",
     "author": "The Community & Fountain module by Manuel Senfft",
     "version": (0, 1),
-    "blender": (2, 80, 0),
+    "blender": (2, 81, 0),
     "location": "Text Editor > Sidebar",
     "description": "Adds functions for live editing of Fountain file with live screenplay preview",
-    "warning": "Dual toggle will not work in 2.81 and 2.82!",
+    "warning": "",
     "wiki_url": "",
     "category": "Text Editor",
 }
@@ -21,118 +21,6 @@ from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty
 from pathlib import Path
 #import fountain2pdf
 
-class FOUNTAIN_PT_panel(bpy.types.Panel):
-    """Preview fountain script as formatted screenplay"""
-    bl_label = "Screenwriter"
-    bl_space_type = 'TEXT_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "Text"
-
-    def draw(self, context):
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = False
-        layout.operator("text.dual_view")
-        layout.operator("scene.preview_fountain")
-        repl = context.scene.text_replace
-        layout.prop(repl, "enabled")
-        #layout.operator("text.export_to_pdf") #not working yet
-
-
-class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
-    '''Updates the preview'''
-    bl_idname = "scene.preview_fountain"
-    bl_label = "Refresh"
-
-    @classmethod
-    def poll(cls, context):
-        space = bpy.context.space_data
-        filepath = bpy.context.area.spaces.active.text.filepath
-        return ((space.type == 'TEXT_EDITOR') and
-                Path(filepath).suffix == ".fountain")
-
-    def execute(self, context):
-        space = bpy.context.space_data
-        dir = os.path.dirname(bpy.data.filepath)
-        if not dir in sys.path:
-            sys.path.append(dir)
-
-        current_text = os.path.basename(bpy.context.space_data.text.filepath)
-        bpy.data.texts[current_text]
-
-        fountain_script = bpy.context.area.spaces.active.text.as_string()
-        if fountain_script.strip() == "": return {"CANCELLED"}
-
-        F = fountain.Fountain(fountain_script)
-
-        filename = "Preview.txt"
-
-        if filename not in bpy.data.texts:
-            bpy.data.texts.new(filename)  # New document in Text Editor
-        else:
-            bpy.data.texts[filename].clear()  # Clear existing text
-
-        #the scroll lock becomes very unaccurate when there is a header of the left window 
-        current_line = bpy.data.texts[current_text].current_line_index-len(F.metadata) #F.metadata is not resulting in the correct number of lines. 
-        current_character = bpy.data.texts[current_text].current_character
-        jump_to_line = 0
-        margin = " "*4
-        document_width = 60+len(margin)
-        action_wrapper = textwrap.TextWrapper(width=document_width)
-        dialogue_wrapper = textwrap.TextWrapper(width=37+int(len(margin)/2))
-        dialogue_indentation = 13+int(len(margin)/2)
-        
-        # title stuff
-        # for meta in iter(F.metadata.items()):
-            # if meta[0] == 'title':
-                # bpy.data.texts[filename].write((str(meta[1])).center(document_width)+chr(10))
-
-        for fc, f in enumerate(F.elements):
-            if f.element_type == 'Scene Heading':
-                bpy.data.texts[filename].write(margin+f.scene_abbreviation + " " + f.element_text + chr(10)) #.upper()
-            elif f.element_type == 'Action' and f.is_centered ==False:
-                action = f.element_text
-                action_list = action_wrapper.wrap(text=action)
-                for action in action_list:
-                    bpy.data.texts[filename].write(margin+action+chr(10))
-            elif f.element_type == 'Action' and f.is_centered == True:
-                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10))
-            elif f.element_type == 'Character':
-                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .upper()
-            elif f.element_type == 'Parenthetical':
-                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .lower()
-            elif f.element_type == 'Dialogue':
-                dialogue = f.element_text
-                line_list = dialogue_wrapper.wrap(text=dialogue)
-                for dialogue in line_list:
-                    bpy.data.texts[filename].write(margin+(" "*dialogue_indentation+dialogue)+chr(10))
-            elif f.element_type == 'Synopsis':          # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Page Break':
-                bpy.data.texts[filename].write(chr(10)+margin+("_"*action_wrapper)+chr(10))
-            elif f.element_type == 'Boneyard':           # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Comment':            # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Section Heading':    # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Transition':
-                bpy.data.texts[filename].write(margin+f.element_text.rjust(document_width)+chr(10))
-            elif f.element_type == 'Empty Line':
-                bpy.data.texts[filename].write(chr(10))
-
-            #print("org "+str(f.original_line))
-            #print("cur "+str(current_line))
-            if current_line >= f.original_line and f.original_line != 0: #current_line
-                jump_to_line = bpy.data.texts[filename].current_line_index
-            
-        #print("Jump: "+str(jump_to_line))    
-        bpy.data.texts[filename].current_line_index = jump_to_line - 1
-        # Set cursor position in 2.81
-        # bpy.data.texts[filename].select_set(jump_to_line - 1, current_character, jump_to_line - 1, current_character + 1)
- 
-        #bpy.ops.text.dual_view()
-        return {"FINISHED"}
 
 def get_mergables(areas):
     xs,ys = dict(),dict()
@@ -176,6 +64,156 @@ def area_from_ptr(ptr):
             if area.as_pointer() == ptr:
                 return area
 
+
+class FOUNTAIN_PT_panel(bpy.types.Panel):
+    """Preview fountain script as formatted screenplay"""
+    bl_label = "Screenwriter"
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Text"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout.operator("text.dual_view")
+        layout.operator("scene.preview_fountain")
+        repl = context.scene.text_replace
+        layout.prop(repl, "enabled")
+        #layout.operator("text.export_to_pdf") #not working yet
+
+
+class FOUNTAIN_OT_preview_fountain(bpy.types.Operator):
+    '''Updates the preview'''
+    bl_idname = "scene.preview_fountain"
+    bl_label = "Refresh"
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+
+    def execute(self, context):
+        space = bpy.context.space_data
+        dir = os.path.dirname(bpy.data.filepath)
+        if not dir in sys.path:
+            sys.path.append(dir)
+
+        current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        if current_text.strip() == "": return
+
+        fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
+
+        F = fountain.Fountain(fountain_script)
+
+        filename = "Preview.txt"
+
+        if filename not in bpy.data.texts:
+            bpy.data.texts.new(filename)  # New document in Text Editor
+        else:
+            bpy.data.texts[filename].clear()  # Clear existing text
+            
+        lines = fountain_script.split('\n\n')
+        lines = lines[0].splitlines()
+        
+        current_line = bpy.data.texts[current_text].current_line_index - len(lines)-1
+        current_character = bpy.data.texts[current_text].current_character
+        jump_to_line = 0
+        margin = " "*4
+        document_width = 60+len(margin)
+        action_wrapper = textwrap.TextWrapper(width=document_width)
+        dialogue_wrapper = textwrap.TextWrapper(width=37+int(len(margin)/2))
+        dialogue_indentation = 13+int(len(margin)/2)
+        cursor_indentation = margin
+        add_lines = 0#int(document_width/current_character)
+        add_characters = current_character
+        cursor_indentation_actual = ""
+        text = bpy.context.area.spaces.active.text
+        current_line_length = len(text.current_line.body)
+        add_lines_actual = 0
+        add_characters_actual = 0
+        
+        # title stuff
+        # for meta in iter(F.metadata.items()):
+            # if meta[0] == 'title':
+                # bpy.data.texts[filename].write((str(meta[1])).center(document_width)+chr(10))
+
+        for fc, f in enumerate(F.elements):
+            add_lines = -1#int(document_width/current_character)
+            add_characters = current_character
+            if f.element_type == 'Scene Heading':
+                bpy.data.texts[filename].write(margin+f.scene_abbreviation + " " + f.element_text + chr(10)) #.upper()
+                cursor_indentation = margin
+            elif f.element_type == 'Action' and f.is_centered ==False:
+                action = f.element_text
+                action_list = action_wrapper.wrap(text=action)
+                
+                for action in action_list:
+                    bpy.data.texts[filename].write(margin+action+chr(10))
+                    # if add_characters >= len(action): 
+                        # add_characters = add_characters-len(action)
+                        # add_lines += 1
+                        # print("chr "+str(add_characters)+"  -  Add lines "+str(add_lines))
+                # add_lines = len(action_list) - add_lines 
+                cursor_indentation = margin
+            elif f.element_type == 'Action' and f.is_centered == True:
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10))
+                cursor_indentation = margin + ("_"*(int((document_width/2-len(f.element_text)/2))-2))
+            elif f.element_type == 'Character':
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .upper()
+                cursor_indentation = margin + ("_"*((f.element_text.center(document_width)).find(f.element_text)))
+            elif f.element_type == 'Parenthetical':
+                bpy.data.texts[filename].write(margin+f.element_text.center(document_width)+chr(10)) # .lower()
+                cursor_indentation = margin + ("_"*int((document_width/2-len(f.element_text)/2)))
+            elif f.element_type == 'Dialogue':
+                dialogue = f.element_text
+                current_character
+                line_list = dialogue_wrapper.wrap(text=dialogue)
+                for dialogue in line_list:
+                    bpy.data.texts[filename].write(margin+(" "*dialogue_indentation+dialogue)+chr(10))
+                    # if add_characters >= len(dialogue):
+                        # add_characters = add_characters-len(dialogue)
+                        # add_lines += 1
+                cursor_indentation = margin + (" "*dialogue_indentation)# + (" "*add_characters)
+            elif f.element_type == 'Synopsis':          # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Page Break':
+                bpy.data.texts[filename].write(chr(10)+margin+("_"*document_width)+chr(10))
+            elif f.element_type == 'Boneyard':           # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Comment':            # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Section Heading':    # Ignored by Fountain formatting
+                bpy.data.texts[filename].write(chr(10))
+            elif f.element_type == 'Transition':
+                bpy.data.texts[filename].write(margin+f.element_text.rjust(document_width)+chr(10))
+                cursor_indentation = margin + ("_"*(document_width-len(f.element_text)))
+            elif f.element_type == 'Empty Line':
+                bpy.data.texts[filename].write(chr(10))
+
+            #print("org "+str(f.original_line))
+            #print("cur "+str(current_line))
+            if current_line >= f.original_line and f.original_line != 0: #current_line
+                jump_to_line = bpy.data.texts[filename].current_line_index
+                cursor_indentation_actual = cursor_indentation
+                #add_lines_actual = add_lines
+                #print("add line: "+str(add_lines_actual))
+                #add_characters_actual = add_characters
+        #print("Jump: "+str(jump_to_line))    
+
+        line = jump_to_line -1 #- add_lines_actual
+        if line < 0: line = 0
+        bpy.data.texts[filename].current_line_index = line
+        cur = current_character + len(cursor_indentation_actual) #+ add_characters_actual
+        bpy.data.texts[filename].select_set(line, cur, line, cur)
+ 
+        return {"FINISHED"}
+
+
 class TEXT_OT_dual_view(bpy.types.Operator):
     '''Toggles screenplay preview'''
     bl_idname = "text.dual_view"
@@ -185,6 +223,7 @@ class TEXT_OT_dual_view(bpy.types.Operator):
     def poll(cls, context):
         space = bpy.context.space_data
         filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
         return ((space.type == 'TEXT_EDITOR') and
                 Path(filepath).suffix == ".fountain")
 
@@ -235,8 +274,9 @@ class TEXT_OT_dual_view(bpy.types.Operator):
 
         if otherarea:  #leave trim-mode
 
-            bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y)
-
+            #bpy.ops.screen.area_join(min_x=thisarea.x, min_y=thisarea.y, max_x=otherarea.x, max_y=otherarea.y) # Use this for 2.80
+            bpy.ops.screen.area_join('INVOKE_DEFAULT', cursor=(otherarea.x, otherarea.y+int(otherarea.height/2)))
+            
             # normal settings
             bpy.ops.screen.screen_full_area()
             bpy.ops.screen.screen_full_area()
@@ -300,6 +340,9 @@ def text_handler(spc, context):
     scene = bpy.context.scene
     text = bpy.context.area.spaces.active.text
     line = text.current_line.body
+    current_text = os.path.basename(bpy.context.space_data.text.filepath)
+    if current_text.strip() == "": return
+    current_character = bpy.data.texts[current_text].current_character
 
     if not text:
         return
@@ -308,9 +351,16 @@ def text_handler(spc, context):
         scene.last_line = line
         scene.last_line_index = text.current_line_index
 
-    if line != bpy.context.scene.last_line and len(line) > len(bpy.context.scene.last_line):
+    if scene.last_character is None:# scene.last_character != current_character:
+        scene.last_character = current_character
+
+    if line != scene.last_line or len(line) != len(scene.last_line):
         bpy.ops.scene.preview_fountain()
+    elif current_character != scene.last_character:
+        bpy.ops.scene.preview_fountain()
+        
     scene.last_line = line
+    scene.last_character = current_character    
 
 
 def redraw(context):
@@ -349,6 +399,16 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
         update=activate_handler,
         default=False)
 
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        if filepath.strip() == "": return False
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+                
+    def execute(self, context):
+        return {"FINISHED"}
 
 # NOT WORKING - THE FONT IS TOO LARGE AND IN THE WRONG STYLE # NB. needs Reportlab and a custom fountain2pdf file. 
 class TEXT_OT_export_to_pdf(bpy.types.Operator):
@@ -398,6 +458,7 @@ def register():
     bpy.utils.register_class(TEXT_OT_dual_view)
     bpy.utils.register_class(TEXT_OT_export_to_pdf)
 
+    bpy.types.Scene.last_character = IntProperty(default=0)
     bpy.types.Scene.last_line = StringProperty(default="")
     bpy.types.Scene.last_line_index = IntProperty(default=0)
 
@@ -411,6 +472,7 @@ def unregister():
     bpy.utils.unregister_class(TEXT_OT_dual_view)
     bpy.utils.unregister_class(TEXT_OT_export_to_pdf)
 
+    del bpy.types.Scene.last_character
     del bpy.types.Scene.last_line
     del bpy.types.Scene.last_line_index
 
