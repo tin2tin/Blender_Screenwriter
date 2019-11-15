@@ -1,20 +1,13 @@
 bl_info = {
-    "name":
-    "Blender Screenwriter with Fountain Live Preview",
-    "author":
-    "Tintwotin, Andrea Monzini, Fountain Module by Manuel Senfft, Export Module by Martin Vilcans",
+    "name": "Blender Screenwriter with Fountain Live Preview",
+    "author": "Tintwotin,  Andrea Monzini, Fountain Module by Colton J. Provias & Manuel Senfft, Export Module by Martin Vilcans. Fountain Format by Nima Yousefi & John August",
     "version": (0, 1),
     "blender": (2, 81, 0),
-    "location":
-    "Text Editor > Sidebar",
-    "description":
-    "Adds functions for editing of Fountain file with live screenplay preview",
-    "warning":
-    "",
-    "wiki_url":
-    "",
-    "category":
-    "Text Editor",
+    "location": "Text Editor > Sidebar",
+    "description": "Adds functions for editing of Fountain file with live screenplay preview",
+    "warning": "",
+    "wiki_url": "",
+    "category": "Text Editor",
 }
 
 import bpy
@@ -112,6 +105,7 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         layout.operator("scene.preview_fountain")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
+        layout.operator("text.scenes_to_strips")
 
 
 class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
@@ -173,7 +167,7 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
             width=37 + int(len(margin) / 2))
         dialogue_indentation = 13 + int(len(margin) / 2)
         cursor_indentation = margin
-        add_lines = 0  #int(document_width/current_character)
+        add_lines = 0
         add_characters = current_character
         cursor_indentation_actual = ""
         text = bpy.context.area.spaces.active.text
@@ -181,30 +175,31 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         add_lines_actual = 0
         add_characters_actual = 0
 
-        # title stuff
+        # This is the way to use title stuff
         # for meta in iter(F.metadata.items()):
         # if meta[0] == 'title':
         # bpy.data.texts[filename].write((str(meta[1])).center(document_width)+chr(10))
 
+        add_lines = 0 
+
         for fc, f in enumerate(F.elements):
-            add_lines = -1  #int(document_width/current_character)
+            add_lines = -1 
+            #add_lines = 0  #int(document_width/current_character)
             add_characters = current_character
             if f.element_type == 'Scene Heading':
+                if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
                 bpy.data.texts[filename].write(
-                    margin + f.scene_abbreviation + " " + f.element_text +
-                    chr(10))  #.upper()
+                    margin + f.scene_number+ f.scene_abbreviation.upper() + " " + f.element_text.upper() +
+                    chr(10))
+                   
                 cursor_indentation = margin
             elif f.element_type == 'Action' and f.is_centered == False:
                 action = f.element_text
                 action_list = action_wrapper.wrap(text=action)
-
+                add_action_lines = 0
+                
                 for action in action_list:
                     bpy.data.texts[filename].write(margin + action + chr(10))
-                    # if add_characters >= len(action):
-                    # add_characters = add_characters-len(action)
-                    # add_lines += 1
-                    # print("chr "+str(add_characters)+"  -  Add lines "+str(add_lines))
-                # add_lines = len(action_list) - add_lines
                 cursor_indentation = margin
             elif f.element_type == 'Action' and f.is_centered == True:
                 bpy.data.texts[filename].write(
@@ -213,13 +208,13 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                     (document_width / 2 - len(f.element_text) / 2)) - 2))
             elif f.element_type == 'Character':
                 bpy.data.texts[filename].write(
-                    margin + f.element_text.center(document_width) +
+                    margin + f.element_text.center(document_width).upper() +
                     chr(10))  # .upper()
                 cursor_indentation = margin + ("_" * ((f.element_text.center(
                     document_width)).find(f.element_text)))
             elif f.element_type == 'Parenthetical':
                 bpy.data.texts[filename].write(
-                    margin + f.element_text.center(document_width) +
+                    margin + f.element_text.center(document_width).lower() +
                     chr(10))  # .lower()
                 cursor_indentation = margin + ("_" * int(
                     (document_width / 2 - len(f.element_text) / 2)))
@@ -248,27 +243,26 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Transition':
                 bpy.data.texts[filename].write(
-                    margin + f.element_text.rjust(document_width) + chr(10))
+                    margin + f.element_text.rjust(document_width).upper() + chr(10))
                 cursor_indentation = margin + ("_" * (
                     document_width - len(f.element_text)))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
-
             #print("org "+str(f.original_line))
             #print("cur "+str(current_line))
             if current_line >= f.original_line and f.original_line != 0:  #current_line
                 jump_to_line = bpy.data.texts[filename].current_line_index
                 cursor_indentation_actual = cursor_indentation
-                #add_lines_actual = add_lines
+                add_lines_actual = add_lines
                 #print("add line: "+str(add_lines_actual))
                 #add_characters_actual = add_characters
         #print("Jump: "+str(jump_to_line))
 
-        line = jump_to_line - 1  #- add_lines_actual
+        line = jump_to_line - 1 #- add_lines_actual
         if line < 0: line = 0
         bpy.data.texts[filename].current_line_index = line
-        cur = current_character + len(
-            cursor_indentation_actual)  #+ add_characters_actual
+        cur = current_character + len(cursor_indentation_actual)  #+ add_characters_actual
+        #print("Character:" + str(cur)+" Line: "+str((line)))
         bpy.data.texts[filename].select_set(line, cur, line, cur)
 
         return {"FINISHED"}
@@ -489,8 +483,7 @@ class SCREENWRITER_OT_export(Operator, ExportHelper):
     )
     # ("PDF", "pdf", "Exports pdf"), #not working currently
     opt_exp: EnumProperty(
-        items=(("HTML", "Html", "Exports html"), ("FDX", "fdx",
-                                                  "Final Draft")),
+        items=(("HTML", "Html", "Exports html"), ("PDF", "pdf", "Exports pdf"), ("FDX", "fdx", "Final Draft")),
         name="Export Data Type",
         description="Choose what format to export ",
         default="HTML")
@@ -577,12 +570,112 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     return {'FINISHED'}
 
 
+class TEXT_OT_scenes_to_strips(bpy.types.Operator):
+    """Convert screenplay data to scene and text strips"""
+    bl_idname = "text.scenes_to_strips"
+    bl_label = "Create Sequence"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        filepath = bpy.context.area.spaces.active.text.filepath
+        return ((space.type == 'TEXT_EDITOR') and
+                Path(filepath).suffix == ".fountain")
+
+    def execute(self, context):
+
+        fountain_script = bpy.context.area.spaces.active.text.as_string()
+        if fountain_script.strip() == "": return {"CANCELLED"}
+
+        F = fountain.Fountain(fountain_script)
+
+        if not bpy.context.scene.sequence_editor:
+            bpy.context.scene.sequence_editor_create()   
+
+        addSceneChannel = 1
+        previous_time = 0
+        previous_line = 0
+        lines_pr_minute = 59
+        first_duration = 0
+        render = bpy.context.scene.render
+        fps = round((render.fps / render.fps_base), 3)
+        count = 0
+        f_collected = []
+        duration = 0
+        
+        for fc, f in enumerate(F.elements):
+            if f.element_type == 'Scene Heading':
+                f_collected.append(f)
+
+        for fc, f in enumerate(f_collected):
+            if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
+            name = str(f.scene_number + f.element_text.title())
+            new_scene = bpy.data.scenes.new(name=name)
+
+            cam = bpy.data.cameras.new("Camera")
+            cam.lens = 35
+            cam_obj1 = bpy.data.objects.new("Camera", cam)
+            cam_obj1.location = (9.69, -10.85, 12.388)
+            cam_obj1.rotation_euler = (0.6799, 0, 0.8254)
+            new_scene.collection.objects.link(cam_obj1)
+
+            if fc == 0:
+                for ec, e in enumerate(f_collected):
+                    if ec == fc + 1:
+                        first_duration = int((((e.original_line)/lines_pr_minute)*60)*fps)
+                        duration = first_duration
+                print("Fc "+str(e.original_line)+" ec "+str(f.original_line))
+            else:
+                for ec, e in enumerate(f_collected):
+                    if ec == fc+1:            
+                        duration = int((((e.original_line - f.original_line)/lines_pr_minute)*60)*fps)
+                        
+            in_time =  duration + previous_time
+            bpy.data.scenes[name].frame_start = 0
+            bpy.data.scenes[name].frame_end = duration
+            newScene=bpy.context.scene.sequence_editor.sequences.new_scene(f.element_text.title(), new_scene, addSceneChannel, previous_time)
+            bpy.context.scene.sequence_editor.sequences_all[newScene.name].scene_camera = bpy.data.objects[cam.name]
+            #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
+            bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = in_time
+            bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = previous_time
+            previous_time = in_time
+            previous_line = f.original_line
+            
+        bpy.ops.sequencer.set_range_to_strips()
+
+        characters_pr_minute = 900
+        for fc, f in enumerate(F.elements):
+            if f.element_type == 'Dialogue':
+                name = str(f.element_text)
+                duration = int(((len(f.original_content)/characters_pr_minute)*60)*fps)
+                in_time = int(((f.original_line/lines_pr_minute)*60)*fps)
+                
+                text_strip = bpy.context.scene.sequence_editor.sequences.new_effect(
+                    name=name,
+                    type='TEXT',
+                    channel=addSceneChannel+1,
+                    frame_start=in_time,
+                    frame_end=in_time + duration
+                    )
+                text_strip.font_size = int(bpy.context.scene.render.resolution_y/18)
+                text_strip.text = str(name)
+                text_strip.use_shadow = True
+                text_strip.select = True
+                text_strip.wrap_width = 0.85
+                text_strip.location[1] = 0.10
+                text_strip.blend_type = 'ALPHA_OVER'
+
+        return {'FINISHED'}
+
+
 def register():
     bpy.utils.register_class(SCREENWRITER_PT_panel)
     bpy.utils.register_class(SCREENWRITER_OT_preview_fountain)
     bpy.utils.register_class(TEXT_OT_dual_view)
     bpy.utils.register_class(SCREENWRITER_OT_export)
     bpy.types.TEXT_MT_text.append(screenwriter_menu_export)
+    bpy.utils.register_class(TEXT_OT_scenes_to_strips)
 
     bpy.types.Scene.last_character = IntProperty(default=0)
     bpy.types.Scene.last_line = StringProperty(default="")
@@ -598,6 +691,7 @@ def unregister():
     bpy.utils.unregister_class(TEXT_OT_dual_view)
     bpy.utils.unregister_class(SCREENWRITER_OT_export)
     bpy.types.TEXT_MT_text.remove(screenwriter_menu_export)
+    bpy.utils.unregister_class(TEXT_OT_scenes_to_strips)
 
     del bpy.types.Scene.last_character
     del bpy.types.Scene.last_line
