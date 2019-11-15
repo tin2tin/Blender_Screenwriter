@@ -7,6 +7,10 @@ Download the files and zip them(downloading as zip will not install succesfully)
 
 In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you create a text-block with a .fountain extention or open .fountain a file. 
 
+To export the Screenplain module is needed. It should install automatic, but if it fails on GNU/Linux, it can be installed with 2 commands with the terminal:
+* '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m ensurepip
+* '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m pip install screenplain
+
 ### Test Screenplay Files
 https://fountain.io/_downloads/Big%20Fish.fountain
 
