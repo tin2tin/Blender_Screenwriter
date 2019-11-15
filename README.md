@@ -10,7 +10,7 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 - Export to Html.
 - Save as Fountain.
 - Extract screenplay data and timings.
-- Auto create a sequence with scenes and dialogue. 
+- Auto create a sequence with 3D scenes and dialogue as subtitles. 
 
 ### How to
 
