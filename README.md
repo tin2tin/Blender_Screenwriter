@@ -1,6 +1,17 @@
 # Blender_Screenwriter
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
+### Features
+
+- Write screenplays in Blender Text Editor.
+- Get live preview of screenplay formatting.
+- Use the simple fountain markup syntax.
+- Export to fdx(Final Draft).
+- Export to Html.
+- Save as Fountain.
+- Extract screenplay data and timings.
+- Auto create a sequence with scenes and dialogue. 
+
 ### How to
 
 Download here: https://github.com/tin2tin/Blender_Screenwriter/releases and use the normal Blender installation procedure.
