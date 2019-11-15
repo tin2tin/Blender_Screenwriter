@@ -73,7 +73,7 @@ def register():
 
 def unregister():
     ### OPERATORS ###
-    from bpy.utils import register_class
+    from bpy.utils import unregister_class
     for cls in classes :
         unregister_class(cls)
 
