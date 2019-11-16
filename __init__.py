@@ -10,8 +10,6 @@ bl_info = {
     "category": "Text Editor",
 }
 
-debug = 1
-
 import bpy
 from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty, EnumProperty
 
