@@ -19,5 +19,4 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
 
 def screenwriter_menu_export(self, context):
     self.layout.separator()
-    self.layout.operator(
-        SCREENWRITER_OT_export.bl_idname, text="Export Screenplay")
+    self.layout.operator("export.screenplay", text="Export Screenplay")

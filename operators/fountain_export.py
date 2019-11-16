@@ -32,10 +32,12 @@ class SCREENWRITER_OT_export(bpy.types.Operator, ExportHelper):
     @classmethod
     def poll(cls, context):
         space = bpy.context.space_data
-        filepath = bpy.context.area.spaces.active.text.filepath
-        if filepath.strip() == "": return False
-        return ((space.type == 'TEXT_EDITOR')
-                and Path(filepath).suffix == ".fountain")
+        try: 
+            filepath = bpy.context.area.spaces.active.text.filepath
+            if filepath.strip() == "": return False
+            return ((space.type == 'TEXT_EDITOR')
+                    and Path(filepath).suffix == ".fountain")
+        except AttributeError: return False
 
     def execute(self, context):
         return screenplay_export(context, self.filepath, self.opt_exp,

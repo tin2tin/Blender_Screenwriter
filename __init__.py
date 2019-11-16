@@ -48,10 +48,6 @@ classes = (SCREENWRITER_PT_panel,
 # import specific
 ##################################
 
-from .gui import screenwriter_menu_export
-from .properties import TextReplaceProperties
-
-
 # reg/unreg
 ##################################
 
