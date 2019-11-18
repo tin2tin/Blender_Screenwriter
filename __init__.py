@@ -37,7 +37,7 @@ from .properties import *
 
 classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_OT_preview_fountain,
-            TEXT_OT_dual_view,
+            SCREENWRITER_OT_dual_view,
             SCREENWRITER_OT_export,
             TEXT_OT_scenes_to_strips,
             TextReplaceProperties            
@@ -63,7 +63,6 @@ def register():
     bpy.types.Scene.last_line = StringProperty(default="")
     bpy.types.Scene.last_line_index = IntProperty(default=0)
     bpy.types.Scene.text_replace = PointerProperty(type=TextReplaceProperties)
-
 
 def unregister():
     ### OPERATORS ###
