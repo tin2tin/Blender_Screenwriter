@@ -3,12 +3,18 @@ import bpy
 from pathlib import Path
 
 from ..debug_value import debug ### DEBUG
+from ..functions.area_functions import findTextEditor
+from ..functions.fountain_functions import returnFountainPreviewText
+from ..global_variables import emptyTextBlock, previewCreated, previewExists
 
 
-class TEXT_OT_dual_view(bpy.types.Operator):
+class SCREENWRITER_OT_dual_view(bpy.types.Operator):
     '''Toggles screenplay preview'''
-    bl_idname = "text.dual_view"
+    bl_idname = "screenwriter.dual_view"
     bl_label = "Preview"
+    bl_options = {'INTERNAL'}
+
+    original_area = None
 
     @classmethod
     def poll(cls, context):
@@ -20,81 +26,37 @@ class TEXT_OT_dual_view(bpy.types.Operator):
                     and Path(filepath).suffix == ".fountain")
         except AttributeError: return False
 
-    original_area = None
 
     def execute(self, context):
-        main_scene = bpy.context.scene
-        count = 0
-        original_type = bpy.context.area.type
-
-        # # setting font (on Windows) not working
-        # try:
-        # for a in bpy.context.screen.areas:
-        # if a.type == 'PREFERENCES':
-        # bpy.context.area.type ="PREFERENCES"
-        # bpy.context.preferences.view.font_path_ui_mono("C:\\Windows\\Fonts\\Courier.ttf")
-        # break
-        # except RuntimeError as ex:
-        # error_report = "\n".join(ex.args)
-        # print("Caught error:", error_report)
-        # #pass
-        bpy.context.area.type = original_type
-        self.original_area = context.area
-        original = context.copy()
-        thisarea = context.area
-        otherarea = None
-        tgxvalue = thisarea.x + thisarea.width + 1
-        thistype = context.area.type
-
-        arealist = list(context.screen.areas)
-
         if debug: print('debug --- start execution') ### DEBUG
 
-        filename = "Preview.txt"
-        if filename not in bpy.data.texts:
-            if debug: print('debug --- start creating the preview') ### DEBUG
-            bpy.ops.scene.preview_fountain()
+        self.original_area = context.area
+        original = context.copy()
 
-            fountain_script = bpy.context.area.spaces.active.text.as_string()
-            if fountain_script.strip() == "":
-                msg = "Text-block can't be empty!"
-                self.report({'INFO'}, msg)
-                return {"CANCELLED"}
+        if debug: print('debug --- getting preview text block') ### DEBUG
+        previewBlock = returnFountainPreviewText(context)
+        if debug: print('debug --- '+str(previewBlock)) ### DEBUG
+        if previewBlock == "":
+            self.report({'INFO'}, emptyTextBlock)
+            return {"FINISHED"}
 
-        for area in context.screen.areas:
-            if debug: print('debug --- iterating through areas : ' + area.type) ### DEBUG
-            if area.type == "TEXT_EDITOR":
-                if area == thisarea:
-                    if debug: print('debug --- context area is this area') ### DEBUG
-                    continue
-                else:
-                    # check if this area is a preview one
-                    if area.spaces.active.text == bpy.data.texts['Preview.txt']:
-                        if debug: print('debug --- preview mode already exists') ### DEBUG
-                        return {"FINISHED"}
-
+        for area in findTextEditor(context):
+            if debug: print('debug --- iterating through text areas') ### DEBUG
+            if area.spaces.active.text == previewBlock:
+                self.report({'INFO'}, previewExists)
+                return {"FINISHED"}
+        
         if debug: print('debug --- splitting context area and starting dual mode') ### DEBUG
 
-        areax = None
-
         #split
-        window = context.window
-        region = context.region
-        screen = context.screen
-        main = context.area
-
-        main.type = "TEXT_EDITOR"
-        ctrlPanel = bpy.ops.screen.area_split(
-            direction="VERTICAL")  #, factor=0.7)
-
+        bpy.ops.screen.area_split(direction="VERTICAL")
+        
         #settings for preview 2.
-        bpy.ops.screen.screen_full_area()
-        bpy.ops.screen.screen_full_area()
-        override = original
         area = self.original_area
+        override = original
         override['area'] = area
         override['space_data'] = area.spaces.active
-        override['space_data'].text = bpy.data.texts['Preview.txt']
+        override['space_data'].text = previewBlock
         override['space_data'].show_region_ui = False
         override['space_data'].show_region_header = False
         override['space_data'].show_region_footer = False
@@ -102,14 +64,6 @@ class TEXT_OT_dual_view(bpy.types.Operator):
         override['space_data'].show_syntax_highlight = False
         override['space_data'].show_word_wrap = False
 
-        for area in context.screen.areas:
-            if area not in arealist:
-                areax = area
-                break
+        self.report({'INFO'}, previewCreated)
 
-        if areax:
-            areax.type = thistype
-        
         return {"FINISHED"}
-
-handler = None
