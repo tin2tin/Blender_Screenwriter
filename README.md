@@ -14,9 +14,9 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 
 ### How to
 
-Download here: https://github.com/tin2tin/Blender_Screenwriter/releases and use the normal Blender installation procedure.
+Download the repository as zip and use the normal Blender installation procedure.
 
-In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you create a text-block with a .fountain extention or open .fountain a file. 
+In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you save a text-block with a .fountain extention or open .fountain a file. 
 
 To export the Screenplain module is needed. It should install automatic, but if installation fails on GNU/Linux, it can be installed with 2 commands in the terminal:
 * '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m ensurepip
