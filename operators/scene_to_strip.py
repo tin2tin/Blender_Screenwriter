@@ -27,10 +27,15 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
 
         F = fountain.Fountain(fountain_script)
 
+        # Find empty channel
         if not bpy.context.scene.sequence_editor:
             bpy.context.scene.sequence_editor_create()   
+        sequences = bpy.context.sequences
+        channels = [s.channel for s in sequences]
+        channels = sorted(list(set(channels)))
+        empty_channel = channels[-1] + 1
+        addSceneChannel = empty_channel
 
-        addSceneChannel = 1
         previous_time = 0
         previous_line = 0
         lines_pr_minute = 59
