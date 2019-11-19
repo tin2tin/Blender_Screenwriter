@@ -31,11 +31,15 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
         if not bpy.context.scene.sequence_editor:
             bpy.context.scene.sequence_editor_create()   
         sequences = bpy.context.sequences
-        channels = [s.channel for s in sequences]
-        channels = sorted(list(set(channels)))
-        empty_channel = channels[-1] + 1
-        addSceneChannel = empty_channel
+        if not sequences:
+            addSceneChannel = 1
+        else:
+            channels = [s.channel for s in sequences]
+            channels = sorted(list(set(channels)))
+            empty_channel = channels[-1] + 1
+            addSceneChannel = empty_channel
 
+        # add scene strips
         previous_time = 0
         previous_line = 0
         lines_pr_minute = 59
@@ -86,7 +90,8 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
             
         bpy.ops.sequencer.set_range_to_strips()
 
-        characters_pr_minute = 900
+        # add dialogue/text strips
+        characters_pr_minute = 850
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Dialogue':
                 name = str(f.element_text)
