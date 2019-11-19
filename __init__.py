@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Blender Screenwriter with Fountain Live Preview",
-    "author": "Tintwotin,  Andrea Monzini, Fountain Module by Colton J. Provias & Manuel Senfft, Export Module by Martin Vilcans. Fountain Format by Nima Yousefi & John August",
+    "author": "Tintwotin, Samy Tichadou, Andrea Monzini, Colton J. Provias, Manuel Senfft, Martin Vilcans, Nima Yousefi & John August",
     "version": (0, 1),
     "blender": (2, 81, 0),
     "location": "Text Editor > Sidebar",
