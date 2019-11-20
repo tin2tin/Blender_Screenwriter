@@ -14,7 +14,8 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
     def poll(cls, context):
         space = bpy.context.space_data
         try: 
-            filepath = bpy.context.area.spaces.active.text.filepath
+            filepath = space.text.name
+            #filepath = bpy.context.area.spaces.active.text.filepath
             if filepath.strip() == "": return False
             return ((space.type == 'TEXT_EDITOR')
                     and Path(filepath).suffix == ".fountain")
