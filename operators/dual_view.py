@@ -30,7 +30,7 @@ class SCREENWRITER_OT_dual_view(bpy.types.Operator):
 
     def execute(self, context):
         if debug: print('debug --- start execution') ### DEBUG
-
+        bpy.ops.scene.preview_fountain()
         self.original_area = context.area
         original = context.copy()
 
