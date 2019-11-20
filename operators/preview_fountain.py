@@ -72,7 +72,7 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         add_characters_actual = 0
         end_line_title = ""
         end_line_nr = 0
-        block_indent = " "*40
+        contact_indent = " "*35
 
         # Add a Title Page
         if contents_has_metadata:
@@ -81,7 +81,7 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
             for meta in iter(F.metadata.items()):
                 if meta[0] == 'title':
                     # blank lines
-                    for l in range(int(document_height/2)-len(meta[1])):
+                    for l in range(int(document_height/2.5)-len(meta[1])):
                         bpy.data.texts[filename].write(chr(10))
                     # title
                     for i in meta[1]:
@@ -113,12 +113,22 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                 # get date
                 elif meta[0] == 'draft date' or meta[0] == 'date':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(block_indent+margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(contact_indent+margin+(str(i)+chr(10)))
 
                 # get contact
                 elif meta[0] == 'contact':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(block_indent+margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(contact_indent+margin+(str(i)+chr(10)))
+
+                # get notes
+                elif meta[0] == 'notes':
+                    for i in meta[1]:
+                        bpy.data.texts[filename].write(contact_indent+margin+(str(i)+chr(10)))
+
+                # get copyright
+                elif meta[0] == 'copyright':
+                    for i in meta[1]:
+                        bpy.data.texts[filename].write(contact_indent+margin+(str(i)+chr(10)))
 
             # insert blank lines after title
             if end_line_title != 0:
