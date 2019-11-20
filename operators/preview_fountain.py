@@ -52,8 +52,6 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
             lines = lines[0].splitlines()
             current_line = bpy.data.texts[current_text].current_line_index - len(
                 lines) - 1
-        # elif contents_has_metadata and not contents_has_body:
-        # self._parse_head(contents.splitlines())
         else:
             current_line = bpy.data.texts[current_text].current_line_index
 
@@ -64,19 +62,17 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         document_width = 60 + len(margin)
         document_height = 56
         action_wrapper = textwrap.TextWrapper(width=document_width)
-        dialogue_wrapper = textwrap.TextWrapper(
-            width=37 + int(len(margin) / 2))
+        dialogue_wrapper = textwrap.TextWrapper(width=37 + int(len(margin) / 2))
         dialogue_indentation = 13 + int(len(margin) / 2)
         cursor_indentation = margin
-        add_lines = 0
         add_characters = current_character
         cursor_indentation_actual = ""
         text = bpy.context.area.spaces.active.text
         current_line_length = len(text.current_line.body)
-        add_lines_actual = 0
         add_characters_actual = 0
         end_line_title = ""
         end_line_nr = 0
+        block_indent = " "*40
 
         # Add a Title Page
         if contents_has_metadata:
@@ -96,27 +92,33 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                 # add credit
                 elif meta[0] == 'credit' or meta[0] == 'credits':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(chr(10)+margin+(str(i).center(document_width)+chr(10)+chr(10)))
+                        end_line_title = str(i)
+                        end_line_nr = bpy.data.texts[filename].current_line_index
 
                 # get author
                 elif meta[0] == 'author' or meta[0] == 'authors':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(margin+(str(i).center(document_width)+chr(10)+chr(10)))
+                        end_line_title = str(i)
+                        end_line_nr = bpy.data.texts[filename].current_line_index
 
                 # get source
                 elif meta[0] == 'source':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(chr(10)+margin+(str(i).center(document_width)+chr(10)))
+                        end_line_title = str(i)
+                        end_line_nr = bpy.data.texts[filename].current_line_index
 
                 # get date
                 elif meta[0] == 'draft date' or meta[0] == 'date':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(block_indent+margin+(str(i)+chr(10)))
 
                 # get contact
                 elif meta[0] == 'contact':
                     for i in meta[1]:
-                        bpy.data.texts[filename].write(margin+(str(i)+chr(10)))
+                        bpy.data.texts[filename].write(block_indent+margin+(str(i)+chr(10)))
 
             # insert blank lines after title
             if end_line_title != 0:
@@ -133,24 +135,17 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
             # add pagebreak
             bpy.data.texts[filename].write(chr(10) + margin + ("_" * document_width) + chr(10))
 
-        add_lines = 0
-
         for fc, f in enumerate(F.elements):
-            add_lines = -1
-            #add_lines = 0  #int(document_width/current_character)
             add_characters = current_character
             if f.element_type == 'Scene Heading':
                 if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
                 bpy.data.texts[filename].write(
-                    margin + f.scene_number+ f.scene_abbreviation.upper() + " " + f.element_text.upper() +
-                    chr(10))
-
+                    margin + f.scene_number+ f.scene_abbreviation.upper() + " " + f.element_text.upper() + chr(10))
                 cursor_indentation = margin
             elif f.element_type == 'Action' and f.is_centered == False:
                 action = f.element_text
                 action_list = action_wrapper.wrap(text=action)
                 add_action_lines = 0
-
                 for action in action_list:
                     bpy.data.texts[filename].write(margin + action + chr(10))
                 cursor_indentation = margin
@@ -178,11 +173,7 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                 for dialogue in line_list:
                     bpy.data.texts[filename].write(margin + (
                         " " * dialogue_indentation + dialogue) + chr(10))
-                    # if add_characters >= len(dialogue):
-                    # add_characters = add_characters-len(dialogue)
-                    # add_lines += 1
-                cursor_indentation = margin + (" " * dialogue_indentation
-                                               )  # + (" "*add_characters)
+                cursor_indentation = margin + (" " * dialogue_indentation)
             elif f.element_type == 'Synopsis':  # Ignored by Fountain formatting
                 bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Page Break':
@@ -201,21 +192,14 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                     document_width - len(f.element_text)))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
-            #print("org "+str(f.original_line))
-            #print("cur "+str(current_line))
-            if current_line >= f.original_line and f.original_line != 0:  #current_line
+            if current_line >= f.original_line and f.original_line != 0:
                 jump_to_line = bpy.data.texts[filename].current_line_index
                 cursor_indentation_actual = cursor_indentation
-                add_lines_actual = add_lines
-                #print("add line: "+str(add_lines_actual))
-                #add_characters_actual = add_characters
-        #print("Jump: "+str(jump_to_line))
 
-        line = jump_to_line - 1 #- add_lines_actual
+        line = jump_to_line - 1
         if line < 0: line = 0
         bpy.data.texts[filename].current_line_index = line
-        cur = current_character + len(cursor_indentation_actual)  #+ add_characters_actual
-        #print("Character:" + str(cur)+" Line: "+str((line)))
+        cur = current_character + len(cursor_indentation_actual)
         bpy.data.texts[filename].select_set(line, cur, line, cur)
 
         return {"FINISHED"}
