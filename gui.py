@@ -11,8 +11,9 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-        layout.operator("screenwriter.dual_view")
-        layout.operator("scene.preview_fountain")
+        row = layout.row(align=True)
+        row.operator("screenwriter.dual_view")
+        row.operator("scene.preview_fountain", text="", icon="FILE_REFRESH")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
         layout.operator("text.scenes_to_strips")
