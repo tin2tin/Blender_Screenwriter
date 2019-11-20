@@ -12,7 +12,8 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
     def poll(cls, context):
         space = bpy.context.space_data
         try:
-            filepath = bpy.context.area.spaces.active.text.filepath
+            filepath = space.text.name
+            #filepath = bpy.context.area.spaces.active.text.filepath
             if filepath.strip() == "": return False
             return ((space.type == 'TEXT_EDITOR')
                     and Path(filepath).suffix == ".fountain")
@@ -24,7 +25,8 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         if not dir in sys.path:
             sys.path.append(dir)
 
-        current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        #current_text = os.path.basename(bpy.context.space_data.text.filepath)
+        current_text = bpy.context.space_data.text.name
         if current_text.strip() == "": return
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
