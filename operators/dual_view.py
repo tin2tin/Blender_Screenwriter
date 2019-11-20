@@ -81,6 +81,8 @@ class SCREENWRITER_OT_dual_view(bpy.types.Operator):
         override['space_data'].show_line_numbers = False
         override['space_data'].show_syntax_highlight = False
         override['space_data'].show_word_wrap = False
+        override['space_data'].show_margin = True
+        override['space_data'].margin_column = 74
 
         self.report({'INFO'}, previewCreated)
 
