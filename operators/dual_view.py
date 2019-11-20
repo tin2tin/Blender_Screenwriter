@@ -49,9 +49,26 @@ class SCREENWRITER_OT_dual_view(bpy.types.Operator):
         
         if debug: print('debug --- splitting context area and starting dual mode') ### DEBUG
 
+        # flip sidebar
+        context = bpy.context
+        c = {}  # override dictionary
+        window = context.window
+        c["window"] = window
+        for screen in bpy.data.screens:
+            c["screen"] = screen
+            for area in screen.areas:
+                c["area"] = area
+                if area.type == "TEXT_EDITOR":
+                    for region in area.regions:
+                        if region.type == 'UI':# and not (region.x - area.x):
+                            c["region"] = region
+                            bpy.ops.screen.region_flip(c)
+                            bpy.context.space_data.show_region_ui = False
+                            bpy.context.space_data.show_region_ui = True
+
         #split
         bpy.ops.screen.area_split(direction="VERTICAL")
-        
+       
         #settings for preview 2.
         area = self.original_area
         override = original
