@@ -32,6 +32,7 @@ from .operators.dual_view import *
 from .operators.fountain_export import *
 from .operators.preview_fountain import *
 from .operators.scene_to_strip import *
+from .operators.switch_to_scene import *
 from .gui import *
 from .properties import *
 
@@ -40,7 +41,9 @@ classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_OT_dual_view,
             SCREENWRITER_OT_export,
             TEXT_OT_scenes_to_strips,
-            TextReplaceProperties            
+            TextReplaceProperties, 
+            SCREENWRITER_PT_sequencer_panel,
+            SCREENWRITER_OT_switch_to_scene,          
             )
 
 # import specific
@@ -63,6 +66,7 @@ def register():
     bpy.types.Scene.last_line = StringProperty(default="")
     bpy.types.Scene.last_line_index = IntProperty(default=0)
     bpy.types.Scene.text_replace = PointerProperty(type=TextReplaceProperties)
+    bpy.types.Scene.title_page_index = IntProperty(default=0)
 
 def unregister():
     ### OPERATORS ###
@@ -78,3 +82,4 @@ def unregister():
     del bpy.types.Scene.last_line
     del bpy.types.Scene.last_line_index
     del bpy.types.Scene.text_replace
+    del bpy.types.Scene.title_page_index

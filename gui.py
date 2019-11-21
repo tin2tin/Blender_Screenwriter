@@ -16,7 +16,21 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         row.operator("scene.preview_fountain", text="", icon="FILE_REFRESH")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
-        layout.operator("text.scenes_to_strips")
+
+
+class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
+    """Screenwriter Sequencer Options"""
+    bl_label = "Sequencer"
+    bl_parent_id = "SCREENWRITER_PT_panel"
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Text"
+
+    def draw(self, context):
+        self.layout.operator("text.scenes_to_strips")
+        self.layout.operator("text.switch_to_scene")
+
 
 def screenwriter_menu_export(self, context):
     self.layout.separator()

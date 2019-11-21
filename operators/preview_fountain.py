@@ -50,11 +50,12 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         if contents_has_metadata and contents_has_body:
             lines = fountain_script.split('\n\n')
             lines = lines[0].splitlines()
-            current_line = bpy.data.texts[current_text].current_line_index - len(
-                lines) - 1
+            current_line = bpy.data.texts[current_text].current_line_index - len(lines) - 1
         else:
             current_line = bpy.data.texts[current_text].current_line_index
 
+        bpy.context.scene.title_page_index = current_line
+        print("her: "+str(bpy.context.scene.title_page_index))
         # Layout
         current_character = bpy.data.texts[current_text].current_character
         jump_to_line = 0

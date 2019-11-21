@@ -43,6 +43,7 @@ def redraw(context):
             if area.type == 'TEXT_EDITOR':
                 area.tag_redraw()
 
+
 def activate_handler(self, context):
     global handler
 
@@ -63,6 +64,7 @@ def activate_handler(self, context):
             spc.draw_handler_remove(handler, "WINDOW")
         handler = None
         print("handler deactivated")
+
 
 class TextReplaceProperties(bpy.types.PropertyGroup):
     enabled: BoolProperty(
