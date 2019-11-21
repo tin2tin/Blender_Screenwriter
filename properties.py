@@ -13,7 +13,8 @@ def text_handler(spc, context):
     scene = bpy.context.scene
     text = bpy.context.area.spaces.active.text
     line = text.current_line.body
-    current_text = os.path.basename(bpy.context.space_data.text.filepath)
+    space = bpy.context.space_data
+    current_text = space.text.name
     if current_text.strip() == "": return
     current_character = bpy.data.texts[current_text].current_character
 
@@ -73,10 +74,12 @@ class TextReplaceProperties(bpy.types.PropertyGroup):
     @classmethod
     def poll(cls, context):
         space = bpy.context.space_data
-        filepath = bpy.context.area.spaces.active.text.filepath
-        if filepath.strip() == "": return False
-        return ((space.type == 'TEXT_EDITOR')
-                and Path(filepath).suffix == ".fountain")
+        try: 
+            filepath = space.text.name
+            if filepath.strip() == "": return False
+            return ((space.type == 'TEXT_EDITOR')
+                    and Path(filepath).suffix == ".fountain")
+        except AttributeError: return False
 
     def execute(self, context):
         return {"FINISHED"}
