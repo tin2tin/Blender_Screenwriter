@@ -72,7 +72,7 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         add_characters_actual = 0
         end_line_title = ""
         end_line_nr = 0
-        contact_indent = " "*35
+        contact_indent = ""#" "*35
 
         # Add a Title Page
         if contents_has_metadata:
