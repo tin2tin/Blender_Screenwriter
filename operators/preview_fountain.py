@@ -25,6 +25,13 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         if not dir in sys.path:
             sys.path.append(dir)
 
+        filename = "Preview.txt"
+
+        if filename not in bpy.data.texts:
+            bpy.data.texts.new(filename)  # New document in Text Editor
+        else:
+            bpy.data.texts[filename].clear()  # Clear existing text
+
         #current_text = os.path.basename(bpy.context.space_data.text.filepath)
         current_text = bpy.context.space_data.text.name
         if current_text.strip() == "": return
@@ -33,13 +40,6 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         if fountain_script.strip() == "": return {"CANCELLED"}
 
         F = fountain.Fountain(fountain_script)
-
-        filename = "Preview.txt"
-
-        if filename not in bpy.data.texts:
-            bpy.data.texts.new(filename)  # New document in Text Editor
-        else:
-            bpy.data.texts[filename].clear()  # Clear existing text
 
         # Get number of header lines
         contents = fountain_script.strip().replace('\r', '')
