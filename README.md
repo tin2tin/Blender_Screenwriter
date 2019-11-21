@@ -1,5 +1,7 @@
 # Blender_Screenwriter
-Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
+Screenplay formatting in Blender Text Editor of Fountain markup syntax.
+
+![](bsw_tut.gif)
 
 ### Features
 
