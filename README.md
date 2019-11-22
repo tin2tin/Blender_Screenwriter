@@ -31,6 +31,9 @@ https://fountain.io/_downloads/Brick%20&%20Steel.fountain
 
 https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 
+### Contribute
+Contributors are more than welcome. Check out the list of issues and see if there is anything you want to work on, or if you got an idea you want to work on then make an issue so we can discuss it there, before it is implemented. 
+
 ### Fountain Syntax
 https://github.com/derickc/Fountainhead#fountain-syntax
 
