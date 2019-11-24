@@ -1,7 +1,7 @@
 import bpy
 
 from .. import fountain
-
+from pathlib import Path
 
 class SCREENWRITER_OT_insert_titlepage(bpy.types.Operator):
     """Insert a title page"""
@@ -41,5 +41,5 @@ Copyright: (c) 2019 Name of author
 
         """)
         bpy.data.texts[filepath].write(txt)
-
+        bpy.ops.scene.preview_fountain() 
         return {"FINISHED"}
