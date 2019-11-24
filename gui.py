@@ -17,6 +17,7 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
         layout.operator("screenwriter.insert_title_page")
+        layout.operator("screenwriter.insert_scene_numbers")
 
 
 class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):

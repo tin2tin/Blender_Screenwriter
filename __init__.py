@@ -45,7 +45,8 @@ classes = (SCREENWRITER_PT_panel,
             TextReplaceProperties, 
             SCREENWRITER_PT_sequencer_panel,
             SCREENWRITER_OT_switch_to_scene,
-            SCREENWRITER_OT_insert_titlepage,         
+            SCREENWRITER_OT_insert_titlepage,
+            SCREENWRITER_OT_insert_scene_numbers,        
             )
 
 # import specific
