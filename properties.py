@@ -58,12 +58,10 @@ def activate_handler(self, context):
             spc,
             context,
         ), "WINDOW", "POST_PIXEL")
-        print("handler activated", handler)
     else:
         if handler is not None:
             spc.draw_handler_remove(handler, "WINDOW")
         handler = None
-        print("handler deactivated")
 
 
 class TextReplaceProperties(bpy.types.PropertyGroup):

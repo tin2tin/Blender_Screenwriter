@@ -57,7 +57,7 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     try:
         import screenplain
     except ImportError:
-        print('Installing screenplain module (this is only required once)...')
+        #Installing screenplain module (this is only required once)...
         import urllib.request as urllib
         import zipfile
         import shutil

@@ -248,21 +248,16 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                     document_width - len(f.element_text)))
             elif f.element_type == 'Empty Line':
                 bpy.data.texts[filename].write(chr(10))
-            #print("org "+str(f.original_line))
-            #print("cur "+str(current_line))
+
             if current_line >= f.original_line and f.original_line != 0:  #current_line
                 jump_to_line = bpy.data.texts[filename].current_line_index
                 cursor_indentation_actual = cursor_indentation
                 add_lines_actual = add_lines
-                #print("add line: "+str(add_lines_actual))
-                #add_characters_actual = add_characters
-        #print("Jump: "+str(jump_to_line))
 
-        line = jump_to_line - 1 #- add_lines_actual
+        line = jump_to_line - 1
         if line < 0: line = 0
         bpy.data.texts[filename].current_line_index = line
-        cur = current_character + len(cursor_indentation_actual)  #+ add_characters_actual
-        #print("Character:" + str(cur)+" Line: "+str((line)))
+        cur = current_character + len(cursor_indentation_actual)
         bpy.data.texts[filename].select_set(line, cur, line, cur)
 
         return {"FINISHED"}
@@ -442,12 +437,10 @@ def activate_handler(self, context):
             spc,
             context,
         ), "WINDOW", "POST_PIXEL")
-        print("handler activated", handler)
     else:
         if handler is not None:
             spc.draw_handler_remove(handler, "WINDOW")
         handler = None
-        print("handler deactivated")
 
 
 class TextReplaceProperties(bpy.types.PropertyGroup):
@@ -526,7 +519,7 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     try:
         import screenplain
     except ImportError:
-        print('Installing screenplain module (this is only required once)...')
+        #Installing screenplain module (this is only required once)...
         import urllib.request as urllib
         import zipfile
         import shutil
@@ -625,7 +618,6 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
                     if ec == fc + 1:
                         first_duration = int((((e.original_line)/lines_pr_minute)*60)*fps)
                         duration = first_duration
-                print("Fc "+str(e.original_line)+" ec "+str(f.original_line))
             else:
                 for ec, e in enumerate(f_collected):
                     if ec == fc+1:            

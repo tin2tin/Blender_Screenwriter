@@ -1,21 +1,16 @@
 # Blender_Screenwriter
-Screenplay formatting in Blender Text Editor of Fountain markup syntax.
-
-![](bsw_tut.gif)
+Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
 ### Features
 
 - Write screenplays in Blender Text Editor.
 - Get live preview of screenplay formatting.
-- Use the fountain markup syntax.
+- Use the simple fountain markup syntax.
 - Export to fdx(Final Draft).
 - Export to Html.
 - Save as Fountain.
 - Extract screenplay data and timings.
-- Auto create a sequence with 3D scenes and dialogue as subtitles.
-- Jump to scene in time line.
-- Insert tile page.
-- Toggle scene numbers.
+- Auto create a sequence with 3D scenes and dialogue as subtitles. 
 
 ### How to
 
@@ -33,9 +28,6 @@ https://fountain.io/_downloads/Big%20Fish.fountain
 https://fountain.io/_downloads/Brick%20&%20Steel.fountain
 
 https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
-
-### Contribute
-Contributors are more than welcome. Check out the list of issues and see if there is anything you want to work on, or if you got an idea you want to work on then make an issue so we can discuss it there, before it is implemented. 
 
 ### Fountain Syntax
 https://github.com/derickc/Fountainhead#fountain-syntax

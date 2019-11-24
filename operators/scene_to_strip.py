@@ -16,7 +16,7 @@ class TEXT_OT_scenes_to_strips(bpy.types.Operator):
         try: 
             filepath = space.text.name
             #filepath = bpy.context.area.spaces.active.text.filepath
-            if filepath.strip() == "": return False
+            if filepath.strip() == "": return {"CANCELLED"}
             return ((space.type == 'TEXT_EDITOR')
                     and Path(filepath).suffix == ".fountain")
         except AttributeError: return False

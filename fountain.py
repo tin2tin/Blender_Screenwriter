@@ -233,9 +233,7 @@ class Fountain:
                             full_strip[
                                 scene_name_start:scene_number_start
                             ].strip(),
-                            scene_number=full_strip[
-                                scene_number_start:
-                            ].strip('#').strip(),
+                            scene_number=full_strip[scene_number_start:].strip('#').strip(),
                             original_line=linenum,
                             scene_abbreviation=line.split()[0],
                             original_content=line

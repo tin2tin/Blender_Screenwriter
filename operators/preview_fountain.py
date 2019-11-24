@@ -55,7 +55,6 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
             current_line = bpy.data.texts[current_text].current_line_index
 
         bpy.context.scene.title_page_index = current_line
-        print("her: "+str(bpy.context.scene.title_page_index))
         # Layout
         current_character = bpy.data.texts[current_text].current_character
         jump_to_line = 0
@@ -185,17 +184,18 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                     bpy.data.texts[filename].write(margin + (
                         " " * dialogue_indentation + dialogue) + chr(10))
                 cursor_indentation = margin + (" " * dialogue_indentation)
-            elif f.element_type == 'Synopsis':  # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Page Break':
                 bpy.data.texts[filename].write(
                     chr(10) + margin + ("_" * document_width) + chr(10))
-            elif f.element_type == 'Boneyard':  # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Comment':  # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
-            elif f.element_type == 'Section Heading':  # Ignored by Fountain formatting
-                bpy.data.texts[filename].write(chr(10))
+            # # not for preview
+            # elif f.element_type == 'Boneyard':  # Ignored by Fountain formatting
+            #     bpy.data.texts[filename].write(chr(10))
+            # elif f.element_type == 'Comment':  # Ignored by Fountain formatting
+            #     bpy.data.texts[filename].write(chr(10))
+            # elif f.element_type == 'Section Heading':  # Ignored by Fountain formatting
+            #     bpy.data.texts[filename].write(chr(10))
+            # elif f.element_type == 'Synopsis':  # Ignored by Fountain formatting
+            #     bpy.data.texts[filename].write(chr(10))
             elif f.element_type == 'Transition':
                 bpy.data.texts[filename].write(
                     margin + f.element_text.rjust(document_width).upper() + chr(10))
