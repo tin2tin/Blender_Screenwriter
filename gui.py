@@ -16,6 +16,7 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         row.operator("scene.preview_fountain", text="", icon="FILE_REFRESH")
         repl = context.scene.text_replace
         layout.prop(repl, "enabled")
+        layout.operator("screenwriter.insert_title_page")
 
 
 class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):

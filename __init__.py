@@ -33,6 +33,7 @@ from .operators.fountain_export import *
 from .operators.preview_fountain import *
 from .operators.scene_to_strip import *
 from .operators.switch_to_scene import *
+from .operators.insert import *
 from .gui import *
 from .properties import *
 
@@ -43,7 +44,8 @@ classes = (SCREENWRITER_PT_panel,
             TEXT_OT_scenes_to_strips,
             TextReplaceProperties, 
             SCREENWRITER_PT_sequencer_panel,
-            SCREENWRITER_OT_switch_to_scene,          
+            SCREENWRITER_OT_switch_to_scene,
+            SCREENWRITER_OT_insert_titlepage,         
             )
 
 # import specific
