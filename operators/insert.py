@@ -42,6 +42,7 @@ Copyright: (c) 2019 Name of author
         """)
         bpy.data.texts[filepath].write(txt)
         bpy.ops.scene.preview_fountain()
+        bpy.data.texts[filepath].select_set(1, 1, 1, 1)
         return {"FINISHED"}
 
 
@@ -72,7 +73,7 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
         scene_nr = 1
         new_body = ""
         lines = str(script_body).splitlines()
-
+        prev_line = bpy.data.texts[filepath].current_line_index
         for line in lines:
             org_line = line
             line = line.lstrip()
@@ -98,6 +99,7 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
 
         bpy.data.texts[filepath].clear()
         bpy.data.texts[filepath].write(new_body)
+        bpy.data.texts[filepath].select_set(prev_line, 1, prev_line, 1)
         bpy.ops.scene.preview_fountain()
 
         return {"FINISHED"}
