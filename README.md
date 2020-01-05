@@ -12,7 +12,9 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 - Extract screenplay data and timings.
 - Auto create a sequence with 3D scenes and dialogue as subtitles. 
 
-### How to
+### How to Install
+
+Use Blender 2.82 Beta or higher.
 
 Download the repository as zip and use the normal Blender installation procedure.
 
