@@ -1,6 +1,10 @@
 # Blender_Screenwriter
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
+### Demo of Main Features
+
+![](bsw_tut.gif)
+
 ### Features
 
 - Write screenplays in Blender Text Editor.
