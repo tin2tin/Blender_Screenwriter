@@ -1,4 +1,4 @@
-# Blender_Screenwriter
+# Blender Screenwriter
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
 ### Demo of Main Features
