@@ -45,7 +45,7 @@ class SCREENWRITER_OT_export(bpy.types.Operator, ExportHelper):
 
 def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
 
-    import os
+    import subprocess, pip, os
     dir = os.path.dirname(bpy.data.filepath)
     if not dir in sys.path:
         sys.path.append(dir)
@@ -55,23 +55,10 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
 
     # screenplain
     try:
-        import screenplain
+      import screenplain
     except ImportError:
-        #Installing screenplain module (this is only required once)...
-        import urllib.request as urllib
-        import zipfile
-        import shutil
-
-        url = 'https://github.com/vilcans/screenplain/archive/0.8.0.zip'
-        home_url = bpy.utils.script_path_user() + "\\addons\\"
-        urllib.urlretrieve(url, home_url + 'screenplain-0.8.0.zip')
-        with zipfile.ZipFile(home_url + 'screenplain-0.8.0.zip', 'r') as z:
-            z.extractall(home_url)
-        target_dir = home_url
-        shutil.move(home_url + 'screenplain-0.8.0/screenplain', target_dir)
-        os.remove(home_url + 'screenplain-0.8.0.zip')
-        shutil.rmtree(home_url + 'screenplain-0.8.0')
-        import screenplain
+      pybin = bpy.app.binary_path_python
+      subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
 
     import screenplain.parsers.fountain as fountain
     from io import StringIO
