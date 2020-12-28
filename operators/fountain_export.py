@@ -55,12 +55,12 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
 
     # screenplain
     try:
-      import screenplain
+        import screenplain.parsers.fountain as fountain
     except ImportError:
-      pybin = bpy.app.binary_path_python
-      subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
+        pybin = bpy.app.binary_path_python
+        subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
+        import screenplain.parsers.fountain as fountain
 
-    import screenplain.parsers.fountain as fountain
     from io import StringIO
     import webbrowser
     s = StringIO(fountain_script)
