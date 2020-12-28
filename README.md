@@ -12,6 +12,8 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 - Use the simple fountain markup syntax.
 - Export to fdx(Final Draft).
 - Export to Html.
+- Assign 3d objects to keywords.
+- Script to Screen sequence generation.
 - Save as Fountain.
 - Extract screenplay data and timings.
 - Auto create a sequence with 3D scenes and dialogue as subtitles. 
