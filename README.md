@@ -24,9 +24,11 @@ Download the repository as zip and use the normal Blender installation procedure
 
 In the Text Editor Sidebar you'll find the Screenwriting buttons. They'll be disabled until you save a text-block with a .fountain extention or open .fountain a file. 
 
-To export the Screenplain module is needed. It should install automatic, but if installation fails on GNU/Linux, it can be installed with 2 commands in the terminal:
+To export the Screenplain[PDF] module https://github.com/vilcans/screenplain is needed. It should install automatic, but if installation fails on GNU/Linux, it can be installed with 2 commands in the terminal:
 * '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m ensurepip
-* '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m pip install screenplain
+* '/INSTALLED_BLENDER_PATH/2.81/python/bin/python3.7m' -m pip install screenplain[PDF]
+
+Alternatively this add-on can be used for module installation in Blender: https://github.com/amb/blender_pip/releases
 
 ### Test Screenplay Files
 https://fountain.io/_downloads/Big%20Fish.fountain
