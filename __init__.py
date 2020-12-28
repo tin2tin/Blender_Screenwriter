@@ -1,18 +1,18 @@
 bl_info = {
-    "name": "Blender Screenwriter with Fountain Live Preview",
-    "author": "Tintwotin, Samy Tichadou, Andrea Monzini, Colton J. Provias, Manuel Senfft, Martin Vilcans, Nima Yousefi & John August",
+    "name": "Screenwriter",
+    "author": "Tintwotin, Samy Tichadou, Gabriel Montagné, Andrea Monzini, Colton J. Provias, Manuel Senfft, Martin Vilcans, Nima Yousefi & John August",
     "version": (0, 1),
     "blender": (2, 81, 0),
     "location": "Text Editor > Sidebar",
-    "description": "Adds functions for editing of Fountain file with live screenplay preview",
+    "description": "Write screenplays and convert to them 3D scenes or export to PDF, Final Draft or HTML",
     "warning": "",
     "wiki_url": "",
     "category": "Text Editor",
 }
 
 import bpy
-from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty, EnumProperty
-
+from bpy.types import Panel, PropertyGroup, UIList, Operator, OperatorFileListElement
+from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty, EnumProperty, CollectionProperty
 
 # load and reload submodules
 ##################################
@@ -34,19 +34,78 @@ from .operators.preview_fountain import *
 from .operators.scene_to_strip import *
 from .operators.switch_to_scene import *
 from .operators.insert import *
+from .operators.assign_keyword_to_objects import *
+#from .operators.screenwriter_fountain import *
 from .gui import *
 from .properties import *
 
+
+# screenplain
+try:
+    import screenplain.parsers.fountain as fountain
+except ImportError:
+    pybin = bpy.app.binary_path_python
+    subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
+    import screenplain.parsers.fountain as fountain
+
+
+class ObjectProperties(PropertyGroup):
+    objectname: StringProperty(name="Name")
+    objecttype: StringProperty(name="Type")
+    runnable: BoolProperty(name="Visible", default=True)
+
+
+class KeywordProperties(PropertyGroup):
+    name: StringProperty(name="Name")
+    objects: CollectionProperty(type=ObjectProperties)
+    object_index: IntProperty(update=on_object_index_change)
+
+
+class AssignKeywordsProperties(PropertyGroup):
+    keywords: CollectionProperty(type=KeywordProperties)
+    keyword_index: IntProperty(update=on_object_index_change)
+
+    new_keyword: StringProperty(name="Name")
+
+
 classes = (SCREENWRITER_PT_panel,
+            #SCREENWRITER_PT_keywords,
+            #SCREENWRITER_PT_objects,
             SCREENWRITER_OT_preview_fountain,
             SCREENWRITER_OT_dual_view,
             SCREENWRITER_OT_export,
-            TEXT_OT_scenes_to_strips,
-            TextReplaceProperties, 
+            #TEXT_OT_scenes_to_strips,
+            TextReplaceProperties,
             SCREENWRITER_PT_sequencer_panel,
             SCREENWRITER_OT_switch_to_scene,
             SCREENWRITER_OT_insert_titlepage,
-            SCREENWRITER_OT_insert_scene_numbers,        
+            SCREENWRITER_OT_insert_scene_numbers,
+
+            RenameKeyword,
+            AddKeyword,
+            RemoveKeyword,
+            MoveKeywordUp,
+            MoveKeywordDown,
+
+            AddObjects,
+            RemoveObject,
+            MoveObjectUp,
+            MoveObjectDown,
+
+            #SCREENWRITER_PT_keywords,
+            #SCREENWRITER_PT_objects,
+
+            OBJECT_UL_screenwriter_keywords,
+            OBJECT_UL_screenwriter_objects,
+
+            ObjectProperties,
+            KeywordProperties,
+            AssignKeywordsProperties,
+
+            SCREENWRITER_OT_to_strips,
+            SCREENWRITER_OT_specific_to_strips,
+            SCREENWRITER_OT_strips_to_markers,
+            SCREENWRITER_OT_clear_markers
             )
 
 # import specific
@@ -58,8 +117,13 @@ classes = (SCREENWRITER_PT_panel,
 def register():
     ### OPERATORS ###
     from bpy.utils import register_class
+    from bpy.types import Scene
+
     for cls in classes :
         register_class(cls)
+
+    Scene.keywords_assigner = PointerProperty(type=AssignKeywordsProperties)
+    bpy.types.Scene.screenwriter_channel = bpy.props.IntProperty(default=0, min=0)
 
     ### MENU ###
     bpy.types.TEXT_MT_text.append(screenwriter_menu_export)
@@ -71,11 +135,16 @@ def register():
     bpy.types.Scene.text_replace = PointerProperty(type=TextReplaceProperties)
     bpy.types.Scene.title_page_index = IntProperty(default=0)
 
+
 def unregister():
     ### OPERATORS ###
     from bpy.utils import unregister_class
+    from bpy.types import Scene
     for cls in classes :
         unregister_class(cls)
+
+    del Scene.keywords_assigner
+    del bpy.types.Scene.screenwriter_channel
 
     ### MENU ###
     bpy.types.TEXT_MT_text.remove(screenwriter_menu_export)
