@@ -29,15 +29,15 @@ class SCREENWRITER_OT_export(bpy.types.Operator, ExportHelper):
         default=True,
     )
 
-    @classmethod
-    def poll(cls, context):
-        space = bpy.context.space_data
-        try: 
-            filepath = bpy.context.area.spaces.active.text.filepath
-            if filepath.strip() == "": return False
-            return ((space.type == 'TEXT_EDITOR')
-                    and Path(filepath).suffix == ".fountain")
-        except AttributeError: return False
+    # @classmethod
+    # def poll(cls, context):
+        # space = bpy.context.space_data
+        # try: 
+            # filepath = bpy.context.area.spaces.active.text.filepath
+            # if filepath.strip() == "": return False
+            # return ((space.type == 'TEXT_EDITOR')
+                    # and Path(filepath).suffix == ".fountain")
+        # except AttributeError: return False
 
     def execute(self, context):
         return screenplay_export(context, self.filepath, self.opt_exp,
@@ -64,7 +64,7 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     from io import StringIO
     import webbrowser
     s = StringIO(fountain_script)
-    screenplay = fountain.parse(s)
+    screenplay = fountain.parse_lines(s)
     output = StringIO()
     if opt_exp == "HTML":
         from screenplain.export.html import convert
