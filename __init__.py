@@ -42,7 +42,7 @@ from .properties import *
 
 
 # screenplain
-pybin = sys.executable#bpy.app.binary_path_python
+pybin = bpy.app.binary_path_python #sys.executable#
 try:
     subprocess.call([pybin, "-m", "ensurepip"])
 except ImportError:
