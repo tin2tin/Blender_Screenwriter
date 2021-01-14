@@ -10,7 +10,7 @@ bl_info = {
     "category": "Text Editor",
 }
 
-import bpy, subprocess, pip
+import bpy, subprocess
 import sys
 from bpy.types import Panel, PropertyGroup, UIList, Operator, OperatorFileListElement
 from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty, EnumProperty, CollectionProperty
