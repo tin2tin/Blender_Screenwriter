@@ -45,7 +45,7 @@ class SCREENWRITER_OT_export(bpy.types.Operator, ExportHelper):
 
 def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
 
-    import subprocess, pip, os
+    import subprocess, os
     dir = os.path.dirname(bpy.data.filepath)
     if not dir in sys.path:
         sys.path.append(dir)
@@ -56,16 +56,9 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     # screenplain
     pybin = sys.executable#bpy.app.binary_path_python
     try:
-        import pip
+        subprocess.call([pybin, "-m", "ensurepip"])
     except ImportError:
-        try:
-            import ensurepip
-            ensurepip.bootstrap(upgrade=True, default_pip=True)
-        except ImportError:
-            try:
-                subprocess.call([pybin, "-m", "ensurepip"])
-            except ImportError:
-                pass
+        pass
     try:
         import screenplain.parsers.fountain as fountain
     except ImportError:
