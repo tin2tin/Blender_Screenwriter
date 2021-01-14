@@ -54,7 +54,7 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     if fountain_script.strip() == "": return {"CANCELLED"}
 
     # screenplain
-    pybin = bpy.app.binary_path_python
+    pybin = sys.executable#bpy.app.binary_path_python
     try:
         import pip
     except ImportError:
