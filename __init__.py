@@ -10,7 +10,8 @@ bl_info = {
     "category": "Text Editor",
 }
 
-import bpy, subprocess, sys
+import bpy, subprocess, pip
+import sys
 from bpy.types import Panel, PropertyGroup, UIList, Operator, OperatorFileListElement
 from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty, EnumProperty, CollectionProperty
 
@@ -41,10 +42,21 @@ from .properties import *
 
 
 # screenplain
+pybin = bpy.app.binary_path_python
+try:
+    import pip
+except ImportError:
+    try:
+        import ensurepip
+        ensurepip.bootstrap(upgrade=True, default_pip=True)
+    except ImportError:
+        try:
+            subprocess.call([pybin, "-m", "ensurepip"])
+        except ImportError:
+            pass
 try:
     import screenplain.parsers.fountain as fountain
 except ImportError:
-    pybin = bpy.app.binary_path_python
     subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
     import screenplain.parsers.fountain as fountain
 
