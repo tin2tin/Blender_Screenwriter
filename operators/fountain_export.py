@@ -54,10 +54,21 @@ def screenplay_export(context, screenplay_filepath, opt_exp, open_browser):
     if fountain_script.strip() == "": return {"CANCELLED"}
 
     # screenplain
+    pybin = bpy.app.binary_path_python
+    try:
+        import pip
+    except ImportError:
+        try:
+            import ensurepip
+            ensurepip.bootstrap(upgrade=True, default_pip=True)
+        except ImportError:
+            try:
+                subprocess.call([pybin, "-m", "ensurepip"])
+            except ImportError:
+                pass
     try:
         import screenplain.parsers.fountain as fountain
     except ImportError:
-        pybin = bpy.app.binary_path_python
         subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
         import screenplain.parsers.fountain as fountain
 
