@@ -44,16 +44,9 @@ from .properties import *
 # screenplain
 pybin = sys.executable#bpy.app.binary_path_python
 try:
-    import pip
+    subprocess.call([pybin, "-m", "ensurepip"])
 except ImportError:
-    try:
-        import ensurepip
-        ensurepip.bootstrap(upgrade=True, default_pip=True)
-    except ImportError:
-        try:
-            subprocess.call([pybin, "-m", "ensurepip"])
-        except ImportError:
-            pass
+    pass
 try:
     import screenplain.parsers.fountain as fountain
 except ImportError:
