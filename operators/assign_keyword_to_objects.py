@@ -140,8 +140,8 @@ class AddObjects(Operator):
                         new_file = keyword.objects.add()
                         new_file.objectname = obj.name
                         new_file.objecttype = obj.type
-                else:
-                    self.report({"INFO"}, "This keyword already has an object named {}".format(obj.name))
+                    else:
+                        self.report({"INFO"}, "This keyword already has an object named {}".format(obj.name))
 
         return {"FINISHED"}
 
