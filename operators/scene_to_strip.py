@@ -240,8 +240,8 @@ def create_scenes_objects(channel, start, end, text):
                 k_collected.append(k.lower())
             # Are there any keywords?           
             props = bpy.context.scene.keywords_assigner
-            if props.keywords and k_collected:
-                camera = 0                
+            camera = 0
+            if props.keywords and k_collected:                
                 for p in range(len(props.keywords)):
                     keyword = props.keywords[p]           
                     if (keyword.name).lower() in k_collected:
