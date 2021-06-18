@@ -26,8 +26,7 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         layout.prop(repl, "enabled")
 
         layout.operator("screenwriter.insert_title_page")
-        # layout.operator("screenwriter.insert_scene_numbers") #unfinished implementation
-
+        layout.operator("screenwriter.insert_scene_numbers")
 
 class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
     """Screenwriter Sequencer Options"""
