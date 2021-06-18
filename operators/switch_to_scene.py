@@ -30,11 +30,12 @@ class SCREENWRITER_OT_switch_to_scene(bpy.types.Operator):
         current_text = bpy.context.space_data.text.name
         if current_text.strip() == "": return
 
+        Nscene = -1
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Scene Heading':
-                for s in bpy.data.scenes:
-                    if f.element_text.title() == s.name and bpy.context.scene.title_page_index == f.original_line:
-                        bpy.context.window.scene = bpy.data.scenes[f.element_text.title()]
-                        break
+                Nscene = Nscene + 1
+            if bpy.context.scene.title_page_index == f.original_line:
+                bpy.context.window.scene = bpy.data.scenes[Nscene]
+                break
 
         return {'FINISHED'}
