@@ -202,6 +202,11 @@ def create_scenes_objects(channel, start, end, text):
     # add scene strips
     f_collected = []
     k_collected = []
+    s_collected = []
+
+    # Find scene names.
+    for s in bpy.data.scenes:
+        s_collected.append(s.name)
 
     # Find scene headings.        
     for fc, f in enumerate(F.elements):
@@ -215,7 +220,11 @@ def create_scenes_objects(channel, start, end, text):
         if text == f.original_content.strip():
             if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
             name = str(f.scene_number + f.element_text.title())
-            new_scene = bpy.data.scenes.new(name=name)
+            # Don't add scene, if it is already existing.
+            if name in s_collected:
+                new_scene = bpy.data.scenes[name]
+            else:
+                new_scene = bpy.data.scenes.new(name=name)
             new_scene.render.fps_base = render.fps_base
             new_scene.render.fps = render.fps
             new_scene.render.resolution_x = render.resolution_x

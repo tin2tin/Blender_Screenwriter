@@ -45,6 +45,7 @@ class AddKeyword(Operator):
 
 
 class RemoveKeyword(Operator):
+    """Remove Keyword"""
     bl_idname = "ops.sw_remove_keyword"
     bl_label = "Remove Keyword"
     bl_options = {"UNDO", "INTERNAL"}
@@ -68,6 +69,7 @@ class RemoveKeyword(Operator):
 
 
 class MoveKeywordUp(Operator):  # "UP" = closer to 0
+    """Move Keyword Up"""
     bl_idname = "ops.sw_move_keyword_up"
     bl_label = "Move Keyword Up"
     bl_options = {"UNDO", "INTERNAL"}
@@ -83,6 +85,7 @@ class MoveKeywordUp(Operator):  # "UP" = closer to 0
 
 
 class MoveKeywordDown(Operator):  # "DOWN" = closer to len(list)
+    """Move Keyword Down"""
     bl_idname = "ops.sw_move_keyword_down"
     bl_label = "Move Keyword Down"
     bl_options = {"UNDO", "INTERNAL"}
@@ -170,6 +173,7 @@ class RemoveObject(Operator):
 
 
 class MoveObjectUp(Operator):  # "UP" = closer to 0
+    """Move Object Up"""
     bl_idname = "ops.sw_move_file_up"
     bl_label = "Move Object Up"
     bl_options = {"UNDO", "INTERNAL"}
@@ -188,6 +192,7 @@ class MoveObjectUp(Operator):  # "UP" = closer to 0
 
 
 class MoveObjectDown(Operator):  # "DOWN" = closer to len(list)
+    """Move Keyword Down"""
     bl_idname = "ops.sw_move_file_down"
     bl_label = "Move Object Down"
     bl_options = {"UNDO", "INTERNAL"}
