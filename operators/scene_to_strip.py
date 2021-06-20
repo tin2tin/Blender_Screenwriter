@@ -245,7 +245,7 @@ def create_scenes_objects(channel, start, end, text):
             if props.keywords and k_collected:                
                 for p in range(len(props.keywords)):
                     keyword = props.keywords[p]           
-                    if (keyword.name).lower() in k_collected:
+                    if key.lower().find((keyword.name).lower()) > -1:
                         # Go through all objects of current keyword.                    
                         for obj in keyword.objects:
                             # Check if object exists.
