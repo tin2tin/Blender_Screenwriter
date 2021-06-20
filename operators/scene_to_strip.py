@@ -224,6 +224,8 @@ def create_scenes_objects(channel, start, end, text):
                 new_scene = bpy.data.scenes[name]
             else:
                 new_scene = bpy.data.scenes.new(name=name)
+            new_scene.master_sequence = bpy.context.scene.name
+            bpy.context.scene.master_sequence = bpy.context.scene.name
             new_scene.render.fps_base = render.fps_base
             new_scene.render.fps = render.fps
             new_scene.render.resolution_x = render.resolution_x

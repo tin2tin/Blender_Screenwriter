@@ -34,8 +34,32 @@ class SCREENWRITER_OT_switch_to_scene(bpy.types.Operator):
         for fc, f in enumerate(F.elements):
             if f.element_type == 'Scene Heading':
                 Nscene = Nscene + 1
-            if bpy.context.scene.title_page_index == f.original_line:
+            if bpy.context.scene.title_page_index == f.original_line and len(bpy.data.scenes) >= Nscene:
                 bpy.context.window.scene = bpy.data.scenes[Nscene]
                 break
+
+        return {'FINISHED'}
+
+
+class SCREENWRITER_OT_switch_to_master(bpy.types.Operator):
+    """Switch to Master Sequence Scene"""
+    bl_idname = "text.switch_to_master"
+    bl_label = "Switch to Master"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        try: 
+            filepath = space.text.name
+            if filepath.strip() == "": return False
+            return ((space.type == 'TEXT_EDITOR')
+                    and Path(filepath).suffix == ".fountain")
+        except AttributeError: return False
+
+    def execute(self, context):
+        scene = bpy.context.scene
+        if scene.master_sequence != "":
+            bpy.context.window.scene = bpy.data.scenes[scene.master_sequence]
 
         return {'FINISHED'}
