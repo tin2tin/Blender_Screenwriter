@@ -215,10 +215,10 @@ def create_scenes_objects(channel, start, end, text):
         if text == f.original_content.strip():
             if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
             name = str(f.scene_number + f.element_text.title())
-            try:
-                 new_scene = bpy.data.scenes[name]
-            except:
-                 new_scene = bpy.data.scenes.new(name=name)
+            if bpy.data.scenes is None:
+                new_scene = bpy.data.scenes[name]
+            else:
+                new_scene = bpy.data.scenes.new(name=name)
             new_scene.render.fps_base = render.fps_base
             new_scene.render.fps = render.fps
             new_scene.render.resolution_x = render.resolution_x
