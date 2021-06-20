@@ -220,7 +220,8 @@ def create_scenes_objects(channel, start, end, text):
             new_scene.render.fps = render.fps
             new_scene.render.resolution_x = render.resolution_x
             new_scene.render.resolution_y = render.resolution_y
-            new_scene.frame_end = frame_end - frame_start
+            new_scene.frame_start = frame_start
+            new_scene.frame_end = frame_end
             new_scene.world = bpy.data.worlds[0]
     # Add objects.
     for fc, f in enumerate(f_collected):
