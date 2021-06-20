@@ -85,6 +85,7 @@ classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_PT_layout_panel,
             SCREENWRITER_PT_sequencer_panel,
             SCREENWRITER_OT_switch_to_scene,
+            SCREENWRITER_OT_switch_to_master,
             SCREENWRITER_OT_insert_titlepage,
             SCREENWRITER_OT_insert_scene_numbers,
 
@@ -141,6 +142,7 @@ def register():
     bpy.types.Scene.last_line_index = IntProperty(default=0)
     bpy.types.Scene.text_replace = PointerProperty(type=TextReplaceProperties)
     bpy.types.Scene.title_page_index = IntProperty(default=0)
+    bpy.types.Scene.master_sequence = StringProperty(default="")
 
 
 def unregister():
