@@ -18,15 +18,61 @@ class SCREENWRITER_PT_panel(bpy.types.Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-        row = layout.row(align=True)
-        row.operator("screenwriter.dual_view")
-        row.operator("scene.preview_fountain", text="", icon="FILE_REFRESH")
-        
-        repl = context.scene.text_replace
-        layout.prop(repl, "enabled")
 
-        layout.operator("screenwriter.insert_title_page")
-        layout.operator("screenwriter.insert_scene_numbers")
+
+class SCREENWRITER_PT_preview_panel(bpy.types.Panel):
+    """Screenwriter Setup Options"""
+    bl_label = "Preview"
+    bl_parent_id = "SCREENWRITER_PT_panel"
+    #bl_options = {'DEFAULT_CLOSED'}
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Screenwriter"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        column = layout.column(heading="Split", align=True)
+        split = column.split(factor=0.4, align=True) 
+        split.alignment = 'RIGHT'
+        split.label(text="Add")
+        split.operator("screenwriter.dual_view", text="Dual View")
+
+        column = layout.column(heading="Refresh", align=True) 
+        repl = context.scene.text_replace
+        column.prop(repl, "enabled", text="Auto")
+        split = column.split(factor=0.4, align=True) 
+        split.alignment = 'RIGHT'
+        split.label(text="")
+        split.operator("scene.preview_fountain", text="Manual")
+        split.active = not repl.enabled
+
+
+class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
+    """Screenwriter Layout Options"""
+    bl_label = "Layout"
+    bl_parent_id = "SCREENWRITER_PT_panel"
+    #bl_options = {'DEFAULT_CLOSED'}
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Screenwriter"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        column = layout.column(heading="Insert", align=True) 
+        split = column.split(factor=0.4, align=False) 
+        split.alignment = 'RIGHT'
+        split.label(text="Insert")
+        split.operator("screenwriter.insert_title_page", text="Title Page")
+        split = column.split(factor=0.4, align=True) 
+        split.alignment = 'RIGHT'
+        split.label(text="")
+        split.operator("screenwriter.insert_scene_numbers", text="Scene Numbers")
+
 
 class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
     """Screenwriter Sequencer Options"""
@@ -44,8 +90,7 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         layout = layout.column(align=False)
 
         row = layout.row(align=False)
-        row.prop(props, "new_keyword", text="Word")
-        row.operator("ops.rename_keyword", icon="COPY_ID", text="")
+        row.prop(props, "new_keyword", text="Keyword")
         row.operator("ops.add_keyword", icon="ADD", text="")
 
         row = layout.row()
@@ -55,6 +100,7 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         col.operator("ops.sw_remove_keyword", text="", icon="REMOVE")
         col.operator("ops.sw_move_keyword_up", text="", icon="TRIA_UP")
         col.operator("ops.sw_move_keyword_down", text="", icon="TRIA_DOWN")
+        col.operator("ops.rename_keyword", text="", icon="COPY_ID")
 
         if 0 <= props.keyword_index < len(props.keywords):
             #layout.label(text="Objects")
