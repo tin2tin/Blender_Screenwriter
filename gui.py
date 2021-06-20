@@ -132,7 +132,15 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         #layout.operator("screenwriter.clear_markers")
         #layout.prop(context.scene, 'screenwriter_channel')
         layout.separator()
-        layout.operator("text.switch_to_scene")
+        column = layout.column(heading="Switch to", align=True) 
+        split = column.split(factor=0.4, align=False) 
+        split.alignment = 'RIGHT'
+        split.label(text="Switch Scene to")
+        split.operator("text.switch_to_scene", text="Screenplay")
+        split = column.split(factor=0.4, align=False) 
+        split.alignment = 'RIGHT'
+        split.label(text="")
+        split.operator("text.switch_to_master", text="Master Edit")
 
 # ---------------------------------------------------------------------------------------------
 # UI LISTS
