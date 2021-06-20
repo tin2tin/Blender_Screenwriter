@@ -201,7 +201,6 @@ def create_scenes_objects(channel, start, end, text):
 
     # add scene strips
     f_collected = []
-    k_collected = []
     s_collected = []
 
     # Find scene names.
@@ -247,15 +246,13 @@ def create_scenes_objects(channel, start, end, text):
                 ):                   
                     key += (str(k.element_text)+' ')
 
-            for k in key.split(' '):
-                k_collected.append(k.lower())
             # Are there any keywords?           
             props = bpy.context.scene.keywords_assigner
             camera = 0
-            if props.keywords and k_collected:                
+            if props.keywords and key:                
                 for p in range(len(props.keywords)):
                     keyword = props.keywords[p]           
-                    if (keyword.name).lower() in k_collected:
+                    if key.lower().find((keyword.name).lower()) > -1:
                         # Go through all objects of current keyword.                    
                         for obj in keyword.objects:
                             # Check if object exists.
@@ -293,8 +290,6 @@ def create_scenes_objects(channel, start, end, text):
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = frame_end
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start               
-
-            k_collected.clear()
         
     bpy.ops.sequencer.set_range_to_strips()
 
