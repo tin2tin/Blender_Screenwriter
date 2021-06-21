@@ -100,9 +100,7 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
                     else:
                         scene_nr +=1
                         take_nr = 0
-                    new_body = new_body + org_line + " #"+str(scene_nr)+('.'+str(take_nr),'')[take_nr==0]+"#" + "\n"
-                    if (line[0:1] != "."):
-                        take_nr  = 0
+                    new_body = new_body + org_line + " #"+str(scene_nr)+(chr(64+take_nr),'')[take_nr==0]+"#" + "\n"
             else:
                 new_body = new_body + org_line + "\n"
 
