@@ -73,7 +73,8 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
         if filepath.strip() == "": return {"CANCELLED"}
 
         script_body = bpy.data.texts[filepath].as_string()
-        scene_nr = 1
+        scene_nr = 0
+        take_nr = 0
         new_body = ""
         lines = str(script_body).splitlines()
         prev_line = bpy.data.texts[filepath].current_line_index
@@ -82,8 +83,8 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
             line = line.lstrip()
             full_strip = line.strip()
             if (
-                line[0:1].upper() in ['.'] or
-                line[0:4].upper() in
+                line[0:1] in ['.'] or
+				line[0:4].upper() in
                 ['INT ', 'INT.', 'EXT ', 'EXT.', 'EST ', 'EST.', 'I/E ', 'I/E.']
             ):
                 # remove exstisting scene numbers
@@ -94,8 +95,14 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
                     new_body = new_body + no_number
                 # insert scene numbers
                 else:
-                    new_body = new_body + org_line + " #"+str(scene_nr)+"#" + "\n"
-                    scene_nr +=1
+                    if (line[0:1] == "."):
+                        take_nr += 1
+                    else:
+                        scene_nr +=1
+                        take_nr = 0
+                    new_body = new_body + org_line + " #"+str(scene_nr)+('.'+str(take_nr),'')[take_nr==0]+"#" + "\n"
+                    if (line[0:1] != "."):
+                        take_nr  = 0
             else:
                 new_body = new_body + org_line + "\n"
 
