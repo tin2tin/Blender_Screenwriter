@@ -89,6 +89,7 @@ classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_OT_insert_titlepage,
             SCREENWRITER_OT_insert_scene_numbers,
 
+            GetKeyword,
             RenameKeyword,
             AddKeyword,
             RemoveKeyword,

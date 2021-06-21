@@ -91,12 +91,13 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
 
         row = layout.row(align=False)
         row.prop(props, "new_keyword", text="Keyword")
-        row.operator("ops.add_keyword", icon="ADD", text="")
+        row.operator("ops.get_keyword", text="", icon="EYEDROPPER")
 
         row = layout.row()
         row.template_list("OBJECT_UL_screenwriter_keywords", "", props, "keywords", props, "keyword_index", rows=5)
 
         col = row.column()
+        col.operator("ops.add_keyword", text="", icon="ADD")
         col.operator("ops.sw_remove_keyword", text="", icon="REMOVE")
         col.operator("ops.sw_move_keyword_up", text="", icon="TRIA_UP")
         col.operator("ops.sw_move_keyword_down", text="", icon="TRIA_DOWN")
