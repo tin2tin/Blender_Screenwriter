@@ -2,6 +2,7 @@
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
 ### Demo of Main Features
+[![Img alt text](https://github.com/tin2tin/Blender_Screenwriter/blob/master/yt_thumb.jpg?raw=true)](https://www.youtube.com/watch?v=KIqQH_e8Hs4)
 
 ![](bsw_tut.gif)
 
