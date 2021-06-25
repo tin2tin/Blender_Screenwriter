@@ -107,3 +107,51 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
         bpy.ops.scene.preview_fountain()
 
         return {"FINISHED"}
+
+
+class SCREENWRITER_OT_correct_caps(bpy.types.Operator):
+    """Correct Caps in hearders and names"""
+    bl_idname = "screenwriter.correct_caps"
+    bl_label = "Correct Caps"
+    bl_options = {'REGISTER', 'UNDO'}
+
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        try:
+            filepath = space.text.name
+            if filepath.strip() == "": return False
+            return ((space.type == 'TEXT_EDITOR')
+                    and Path(filepath).suffix == ".fountain")
+        except AttributeError: return False
+
+
+    def execute(self, context):
+        space = bpy.context.space_data
+        filepath = space.text.name
+        if filepath.strip() == "": return {"CANCELLED"}
+
+        script_body = bpy.data.texts[filepath].as_string()
+        new_body = ""
+        lines = str(script_body).splitlines()
+        prev_line = bpy.data.texts[filepath].current_line_index
+        for line in lines:
+            org_line = line
+            line = line.lstrip()
+            full_strip = line.strip()
+            if (
+                line[0:4].upper() in
+                ['INT ', 'INT.', 'EXT ', 'EXT.', 'EST ', 'EST.', 'I/E ', 'I/E.', 'EXT/', 'INT/']
+                or (line[0:1] in ['.'] and not line[0:2] in ['..'])
+            ):
+                new_body = new_body + org_line.upper() + "\n"
+            else:
+                new_body = new_body + org_line + "\n"
+
+        bpy.data.texts[filepath].clear()
+        bpy.data.texts[filepath].write(new_body)
+        bpy.data.texts[filepath].select_set(prev_line, 1, prev_line, 1)
+        bpy.ops.scene.preview_fountain()
+
+        return {"FINISHED"}
