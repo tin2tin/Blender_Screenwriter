@@ -49,6 +49,10 @@ class SCREENWRITER_PT_preview_panel(bpy.types.Panel):
         split.operator("scene.preview_fountain", text="Manual")
         split.active = not repl.enabled
 
+        prefs = context.preferences
+        view = prefs.view
+        layout.prop(view, "font_path_ui_mono", text="Font")
+
 
 class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
     """Screenwriter Layout Options"""
