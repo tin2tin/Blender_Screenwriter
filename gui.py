@@ -67,7 +67,7 @@ class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
-        column = layout.column(heading="Insert", align=True) 
+        column = layout.column(align=True) 
         split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="Insert")
@@ -77,6 +77,11 @@ class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
         split.label(text="")
         split.operator("screenwriter.insert_scene_numbers", text="Scene Numbers")
 
+        column = layout.column(align=True)
+        split = column.split(factor=0.4, align=False) 
+        split.alignment = 'RIGHT'
+        split.label(text="Correct")
+        split.operator("screenwriter.correct_caps", text="Caps")
 
 class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
     """Screenwriter Sequencer Options"""

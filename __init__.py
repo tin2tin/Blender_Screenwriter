@@ -88,6 +88,7 @@ classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_OT_switch_to_master,
             SCREENWRITER_OT_insert_titlepage,
             SCREENWRITER_OT_insert_scene_numbers,
+            SCREENWRITER_OT_correct_caps,
 
             GetKeyword,
             RenameKeyword,
