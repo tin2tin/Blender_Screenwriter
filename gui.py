@@ -140,12 +140,12 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         column = layout.column(heading="Switch to", align=True) 
         split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
-        split.label(text="Switch Scene to")
-        split.operator("text.switch_to_scene", text="Screenplay")
+        split.label(text="Switch to")
+        split.operator("text.switch_to_scene", text="Screenplay Scene")
         split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="")
-        split.operator("text.switch_to_master", text="Master Edit")
+        split.operator("text.switch_to_master", text="Master Scene")
 
 # ---------------------------------------------------------------------------------------------
 # UI LISTS
