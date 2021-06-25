@@ -41,7 +41,12 @@ Copyright: (c) 2019 Name of author
 
         """)
         bpy.data.texts[filepath].write(txt)
-        bpy.ops.scene.preview_fountain()
+
+        try:
+            bpy.ops.scene.preview_fountain()
+        except:
+            pass
+
         bpy.data.texts[filepath].select_set(1, 1, 1, 1)
         return {"FINISHED"}
 
@@ -80,9 +85,8 @@ class SCREENWRITER_OT_insert_scene_numbers(bpy.types.Operator):
             full_strip = line.strip()
             if (
                 line[0:4].upper() in
-                ['INT ', 'INT.', 'EXT ', 'EXT.', 'EST ', 'EST.', 'I/E ', 'I/E.'] or
-                line[0:8].upper() in ['INT/EXT ', 'INT/EXT.'] or
-                line[0:9].upper() in ['INT./EXT ', 'INT./EXT.']
+                ['INT ', 'INT.', 'EXT ', 'EXT.', 'EST ', 'EST.', 'I/E ', 'I/E.', 'EXT/', 'INT/']
+                or (line[0:1] in ['.'] and not line[0:2] in ['..'])
             ):
                 # remove exstisting scene numbers
                 if full_strip[-1] == '#' and full_strip.count('#') > 1:
