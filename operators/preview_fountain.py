@@ -148,8 +148,10 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
         for fc, f in enumerate(F.elements):
             add_characters = current_character
             if f.element_type == 'Scene Heading':
-                if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
-                if f.scene_abbreviation[0:1] in ['.']: f.scene_abbreviation = f.scene_abbreviation[1:]
+                if f.scene_abbreviation[0:1] in ['.']: 
+                    f.scene_abbreviation = f.scene_abbreviation[2:]
+                    if str(f.scene_number) != "": f.scene_number = f.scene_number
+                elif str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
                 bpy.data.texts[filename].write(
                     margin + f.scene_number+ f.scene_abbreviation.upper() + " " + f.element_text.upper() + chr(10))
                 cursor_indentation = margin
