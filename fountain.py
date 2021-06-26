@@ -168,7 +168,7 @@ class Fountain:
                 self.elements.append(
                     FountainElement(
                         'Comment',
-                        full_strip.strip('[] \t'),
+                        full_strip, #.strip('[] \t')
                         original_line=linenum,
                         original_content=line
                     )
