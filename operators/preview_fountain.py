@@ -1,4 +1,4 @@
-import bpy, textwrap, os, sys
+import bpy, textwrap, os, sys, re
 
 from .. import fountain
 from pathlib import Path
@@ -38,6 +38,14 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
 
         fountain_script = bpy.context.area.spaces.active.text.as_string()
         if fountain_script.strip() == "": return {"CANCELLED"}
+
+        # Clean out notes and comments.
+        reg_exp = "\\[\\[(.*?)\\]\\]"
+        fountain_script = re.sub(reg_exp, "", fountain_script)
+
+        # Clean out multiple empty lines.
+        reg_exp = "'[\n]+', '\n'"
+        fountain_script = re.sub(r'[\r\n][\r\n]{2,}', '\n\n', fountain_script)
 
         F = fountain.Fountain(fountain_script)
 
