@@ -117,23 +117,6 @@ def to_scenes(script):
     return scenes
 
 
-def proper_sentence(input):
-    result = []
-    
-    sentences = re.findall('([\w<][^\.!?]*[\.!?])',input)
-    for sentence in sentences:
-        if sentence[0] != '<':
-            sentence = sentence.capitalize()
-        else:
-            tag_text = re.findall('>(.*?)<', sentence)
-            first_tag = '>' + tag_text[0].capitalize() + '<'
-            sentence = re.sub('>(.*?)<', first_tag, sentence)
-
-        result.append(sentence)
-
-    return ' '.join(result)
-
-
 def lay_out_scenes(scenes):
     next = 0
     channel = find_empty_channel()+10
@@ -257,18 +240,29 @@ def create_scenes_objects(channel, start, end, text):
                 if shot.element_type == 'Scene Heading': 
                     if str(shot.element_text.title()) == str(f.element_text.title()):
                         found_scene = str(shot.element_text.title())
+                        shot_camera = 0
                     else:
                         found_scene = ""
                 # Add shots as cameras.
                 if found_scene and (shot.element_type == 'Comment' or shot.element_type == 'Action'):
-                    regex = "\\[\\[SHOT: (.*?)\\]\\]"
-                    matches = re.findall(regex, shot.element_text.upper())
+                    regex = "\\[\\[SHOT:(?i)(.*?)\\]\\]"
+                    matches = re.findall(regex, shot.element_text)
                     for match in matches:
-                        new_camera = bpy.ops.object.camera_add(enter_editmode=False, align='VIEW', location=(0, 0, 0), rotation=(1.10871, 0.0132652, 1.14827), scale=(1, 1, 1))
-                        bpy.context.object.name = proper_sentence(match)     
+                        bpy.ops.object.camera_add(rotation=(1.5708, 0, 0))
+                        bpy.context.object.data.type = 'ORTHO'
+                        bpy.context.object.data.ortho_scale = 3.2
+                        bpy.context.object.name = match
                         new_object = bpy.data.objects[bpy.context.object.name]
                         bpy.data.scenes[new_scene.name].collection.objects.link(new_object)
                         bpy.ops.object.delete(use_global=False, confirm=False)
+                        shot_camera += 1
+                        # Add scene strips.
+                        sse = bpy.context.scene.sequence_editor
+                        newScene=sse.sequences.new_scene(match, new_scene, channel+shot_camera, frame_start)
+                        sse.sequences_all[newScene.name].scene_camera = new_object
+                        sse.sequences_all[newScene.name].animation_offset_start = 0
+                        sse.sequences_all[newScene.name].frame_final_end = frame_end
+                        sse.sequences_all[newScene.name].frame_start = frame_start
                  
     # Add objects.
     for fc, f in enumerate(f_collected):
