@@ -116,6 +116,24 @@ def to_scenes(script):
 
     return scenes
 
+
+def proper_sentence(input):
+    result = []
+    
+    sentences = re.findall('([\w<][^\.!?]*[\.!?])',input)
+    for sentence in sentences:
+        if sentence[0] != '<':
+            sentence = sentence.capitalize()
+        else:
+            tag_text = re.findall('>(.*?)<', sentence)
+            first_tag = '>' + tag_text[0].capitalize() + '<'
+            sentence = re.sub('>(.*?)<', first_tag, sentence)
+
+        result.append(sentence)
+
+    return ' '.join(result)
+
+
 def lay_out_scenes(scenes):
     next = 0
     channel = find_empty_channel()+10
@@ -202,6 +220,7 @@ def create_scenes_objects(channel, start, end, text):
     # add scene strips
     f_collected = []
     s_collected = []
+    found_scene = ""
 
     # Find scene names.
     for s in bpy.data.scenes:
@@ -217,8 +236,8 @@ def create_scenes_objects(channel, start, end, text):
     fps = round((render.fps / render.fps_base), 3)
     for fc, f in enumerate(f_collected):
         if text == f.original_content.strip():
-            if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
-            name = str(f.scene_number + f.element_text.title())
+            #if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
+            name = str(f.element_text.title()) # f.scene_number + 
             # Don't add scene, if it is already existing.
             if name in s_collected:
                 new_scene = bpy.data.scenes[name]
@@ -233,6 +252,24 @@ def create_scenes_objects(channel, start, end, text):
             new_scene.frame_start = frame_start
             new_scene.frame_end = frame_end
             new_scene.world = bpy.data.worlds[0]
+
+            for shot_count, shot in enumerate(F.elements):
+                if shot.element_type == 'Scene Heading': 
+                    if str(shot.element_text.title()) == str(f.element_text.title()):
+                        found_scene = str(shot.element_text.title())
+                    else:
+                        found_scene = ""
+                # Add shots as cameras.
+                if found_scene and (shot.element_type == 'Comment' or shot.element_type == 'Action'):
+                    regex = "\\[\\[SHOT: (.*?)\\]\\]"
+                    matches = re.findall(regex, shot.element_text.upper())
+                    for match in matches:
+                        new_camera = bpy.ops.object.camera_add(enter_editmode=False, align='VIEW', location=(0, 0, 0), rotation=(1.10871, 0.0132652, 1.14827), scale=(1, 1, 1))
+                        bpy.context.object.name = proper_sentence(match)     
+                        new_object = bpy.data.objects[bpy.context.object.name]
+                        bpy.data.scenes[new_scene.name].collection.objects.link(new_object)
+                        bpy.ops.object.delete(use_global=False, confirm=False)
+                 
     # Add objects.
     for fc, f in enumerate(f_collected):
         if text == f.original_content.strip():
