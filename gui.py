@@ -76,6 +76,10 @@ class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
         split.alignment = 'RIGHT'
         split.label(text="")
         split.operator("screenwriter.insert_scene_numbers", text="Scene Numbers")
+        split = column.split(factor=0.4, align=True) 
+        split.alignment = 'RIGHT'
+        split.label(text="")
+        split.operator("screenwriter.insert_shot", text="Shot")
 
         column = layout.column(align=True)
         split = column.split(factor=0.4, align=False) 
