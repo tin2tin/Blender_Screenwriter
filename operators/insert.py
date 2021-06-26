@@ -155,3 +155,31 @@ class SCREENWRITER_OT_correct_caps(bpy.types.Operator):
         bpy.ops.scene.preview_fountain()
 
         return {"FINISHED"}
+
+
+
+class SCREENWRITER_OT_insert_shot(bpy.types.Operator):
+    """Insert Shot"""
+    bl_idname = "screenwriter.insert_shot"
+    bl_label = "Insert Shot"
+    bl_options = {'REGISTER', 'UNDO'}
+
+
+    @classmethod
+    def poll(cls, context):
+        space = bpy.context.space_data
+        try:
+            filepath = space.text.name
+            if filepath.strip() == "": return False
+            return ((space.type == 'TEXT_EDITOR')
+                    and Path(filepath).suffix == ".fountain")
+        except AttributeError: return False
+
+
+    def execute(self, context):
+        txt = bpy.ops.text
+        txt.insert(text='[[Shot: ]]')
+        txt.move(type='PREVIOUS_CHARACTER')
+        txt.move(type='PREVIOUS_CHARACTER')
+
+        return {"FINISHED"}
