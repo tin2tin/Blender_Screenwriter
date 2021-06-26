@@ -18,6 +18,7 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 - Save as Fountain.
 - Extract screenplay data and timings.
 - Auto create a sequence with 3D scenes and dialogue as subtitles. 
+- Insert camera when [[SHOT: ]] tag is used.
 
 ### How to Install
 
