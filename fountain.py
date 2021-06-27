@@ -277,28 +277,41 @@ class Fountain:
 
             if full_strip[0] == '>':
                 newlines_before = 0
-                if len(full_strip) > 1 and full_strip[-1]:
-                    self.elements.append(
-                        FountainElement(
-                            'Action',
-                            full_strip[1:-1].strip(),
-                            is_centered=True,
-                            original_line=linenum,
-                            original_content=line
-                        )
+            if full_strip.startswith('>') and full_strip.endswith('<'):
+                self.elements.append(
+                    FountainElement(
+                        'Action',
+                        full_strip[1:-1].strip(),
+                        is_centered=True,
+                        original_line=linenum,
+                        original_content=line
                     )
-                else:
-                    self.elements.append(
-                        FountainElement(
-                            'Transition',
-                            full_strip[1:].strip(),
-                            original_line=linenum,
-                            original_content=line
-                        )
-                    )
+                )
                 continue
 
-            if (
+            if full_strip.startswith('>') and not full_strip.endswith('<'):
+                self.elements.append(
+                    FountainElement(
+                        'Transition',
+                        full_strip[1:].strip(),
+                        original_line=linenum,
+                        original_content=line
+                    )
+                )
+                continue
+
+            if full_strip[0] == '@':
+                self.elements.append(
+                    FountainElement(
+                        'Character',
+                        full_strip[1:].strip(),
+                        original_line=linenum,
+                        original_content=line
+                    )
+                )
+                is_inside_dialogue_block = True
+                continue
+            elif (
                 newlines_before > 0 and
                 index + 1 < len(script_body) and
                 script_body[index + 1] and
