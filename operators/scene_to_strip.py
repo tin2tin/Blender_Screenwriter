@@ -253,6 +253,7 @@ def create_scenes_objects(channel, start, end, text):
                         bpy.context.object.data.ortho_scale = 3.2
                         bpy.context.object.name = match
                         new_object = bpy.data.objects[bpy.context.object.name]
+                        bpy.ops.transform.translate(value=(shot_camera * 4, 0, 0))
                         bpy.data.scenes[new_scene.name].collection.objects.link(new_object)
                         bpy.ops.object.delete(use_global=False, confirm=False)
                         shot_camera += 1
