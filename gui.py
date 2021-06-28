@@ -87,11 +87,12 @@ class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
         split.label(text="Correct")
         split.operator("screenwriter.correct_caps", text="Caps")
 
-class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
-    """Screenwriter Sequencer Options"""
-    bl_label = "Sequencer"
+
+class SCREENWRITER_PT_screenplayer_panel(bpy.types.Panel):
+    """Screenwriter Screenplayer Options"""
+    bl_label = "Screenplayer"
     bl_parent_id = "SCREENWRITER_PT_panel"
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
     bl_space_type = 'TEXT_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Screenwriter"
@@ -101,23 +102,24 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         scn = context.scene
         props = scn.keywords_assigner
         layout = layout.column(align=False)
-
+        layout.label(text="Keywords from Screenplay:")
         row = layout.row(align=False)
-        row.prop(props, "new_keyword", text="Keyword")
-        row.operator("ops.add_keyword", text="", icon="ADD")
+        row.prop(props, "new_keyword", text="")
+        row.operator("ops.get_keyword", text="", icon="EYEDROPPER")
 
         row = layout.row()
         row.template_list("OBJECT_UL_screenwriter_keywords", "", props, "keywords", props, "keyword_index", rows=5)
 
         col = row.column()
+        col.operator("ops.add_keyword", text="", icon="ADD")
         col.operator("ops.sw_remove_keyword", text="", icon="REMOVE")
         col.operator("ops.sw_move_keyword_up", text="", icon="TRIA_UP")
         col.operator("ops.sw_move_keyword_down", text="", icon="TRIA_DOWN")
-        col.operator("ops.get_keyword", text="", icon="EYEDROPPER")
+
         col.operator("ops.rename_keyword", text="", icon="COPY_ID")
 
         if 0 <= props.keyword_index < len(props.keywords):
-            #layout.label(text="Objects")
+            layout.label(text="Assigned 3D Objects:")
             keyword = props.keywords[props.keyword_index]
 
             row = layout.row()
@@ -145,7 +147,21 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         #layout.operator("screenwriter.strips_to_markers")
         #layout.operator("screenwriter.clear_markers")
         #layout.prop(context.scene, 'screenwriter_channel')
-        layout.separator()
+
+
+class SCREENWRITER_PT_navigation_panel(bpy.types.Panel):
+    """Screenwriter Navigation Options"""
+    bl_label = "Navigation"
+    bl_parent_id = "SCREENWRITER_PT_screenplayer_panel"
+    #bl_options = {'DEFAULT_CLOSED'}
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Screenwriter"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
         column = layout.column(heading="Switch to", align=True) 
         split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
@@ -155,6 +171,7 @@ class SCREENWRITER_PT_sequencer_panel(bpy.types.Panel):
         split.alignment = 'RIGHT'
         split.label(text="")
         split.operator("text.switch_to_master", text="Master Scene")
+
 
 # ---------------------------------------------------------------------------------------------
 # UI LISTS
