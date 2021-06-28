@@ -19,8 +19,8 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 - Insert scene numbers.
 - Correct caps.
 - Insert [[SHOT: ]] note/comment - will generate a camera in the scene. 
-- "> my action <" will center action.
-- ">" will force transtion.
+- ">my action<" will center action.
+- ">" will force transition.
 - "@" will force character(may not be supported by all fountain parsers).
 - "." will force scene header.
 - Export to pdf.
