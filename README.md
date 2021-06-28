@@ -8,20 +8,37 @@ Screenplay formatting in Blender Text Editor of Fountain markup syntax.
 
 ### Features
 
+## Screenwriter
 - Write screenplays in Blender Text Editor.
 - Get live preview of screenplay formatting.
 - Use the simple fountain markup syntax.
-- Export to fdx(Final Draft).
-- Export to Html.
-- Assign 3d objects to keywords.
-- Script to Screen sequence generation.
+- Open as Fountain.
 - Save as Fountain.
-- Extract screenplay data and timings.
-- Auto create a sequence with 3D scenes and dialogue as subtitles. 
-- Insert camera when [[SHOT: ]] tag is used.
+- Change font(for preview).
+- Insert Title Page.
+- Insert scene numbers.
+- Correct caps.
+- Insert [[SHOT: ]] note/comment - will generate a camera in the scene. 
 - "> my action <" will center action.
 - ">" will force transtion.
-- "@" will force character.
+- "@" will force character(may not be supported by all fountain parsers).
+- "." will force scene header.
+- Export to pdf.
+- Export to fdx(Final Draft).
+- Export to Html.
+
+## Screenplayer
+- Script to Screen sequence generation.
+- Assign 3d objects to screenplay keywords.
+- Extract screenplay data and timings.
+- Create a sequence with scene headings, action and dialogue as timed text strips.
+- Generate scenes for each screenplay scene.
+- Populated scenes with 3d objects assigned to words in the screenplay scene, where the words appear.
+- If more cameras are assigned to a scene, scene strips pointing to cameras and a multicam strip will be added to the master edit.
+- Generate cameras for each [[SHOT: ]] note/comment in the scenes where they appear. 
+- Switch to the 3d scene based on the position of the screenplay scene.
+- Switch back to the master edit scene.
+
 
 ### How to Install
 
