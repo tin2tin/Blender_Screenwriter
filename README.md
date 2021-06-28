@@ -64,12 +64,26 @@ https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 ### Fountain Syntax
 https://github.com/derickc/Fountainhead#fountain-syntax
 
-### More Blender Fountain add-ons
+### More Blender Screenwriter utility add-ons
 Adding markers and writing timed script into the 3D View:
 https://github.com/tin2tin/blender-fountain-addon
 
-Improved timing and more info as text strips:
-https://github.com/gabrielmontagne/blender-addon-unfurl-fountain
+Switch cameras in 3D View from Sequencer:
+https://github.com/tin2tin/scene_strip_tools
+
+Switch to the scene of the Scene strip:
+https://github.com/tin2tin/VSESwitchToScene
+
+Link text from TExt strip to text in 3D View:
+https://github.com/gabrielmontagne/blender-addon-link-text-to-vse-subtitle
+
+Split text to node editor frames:
+https://github.com/gabrielmontagne/blender-addon-split-frame-from-text
+
+Link text to node editor frames:
+https://github.com/gabrielmontagne/blender-addon-link-text-to-frame
+
+
 
 ### About
 
