@@ -42,8 +42,8 @@ class SCREENWRITER_PT_preview_panel(bpy.types.Panel):
 
         column = layout.column(heading="Refresh", align=True) 
         repl = context.scene.text_replace
-        column.prop(repl, "enabled", text="Auto")
-        split = column.split(factor=0.4, align=True) 
+        column.prop(repl, "enabled", text="Auto", toggle=True)
+        split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="")
         split.operator("scene.preview_fountain", text="Manual")
@@ -67,16 +67,19 @@ class SCREENWRITER_PT_layout_panel(bpy.types.Panel):
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False
+
         column = layout.column(align=True) 
         split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="Insert")
         split.operator("screenwriter.insert_title_page", text="Title Page")
-        split = column.split(factor=0.4, align=True) 
+
+        split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="")
         split.operator("screenwriter.insert_scene_numbers", text="Scene Numbers")
-        split = column.split(factor=0.4, align=True) 
+
+        split = column.split(factor=0.4, align=False) 
         split.alignment = 'RIGHT'
         split.label(text="")
         split.operator("screenwriter.insert_shot", text="Shot")
@@ -142,8 +145,10 @@ class SCREENWRITER_PT_screenplayer_panel(bpy.types.Panel):
 #            col.operator("ops.sw_run_objects", icon="PLAY")
             
         #layout.operator("text.scenes_to_strips")
-
-        layout.operator("screenwriter.fountain_to_strips")
+        layout_big = layout.column(align=False)
+        layout_big.separator()
+        layout_big.scale_y = 1.3
+        layout_big.operator("screenwriter.fountain_to_strips", text="Generate Movie")
         #layout.operator("screenwriter.strips_to_markers")
         #layout.operator("screenwriter.clear_markers")
         #layout.prop(context.scene, 'screenwriter_channel')
