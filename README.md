@@ -65,8 +65,12 @@ https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 https://github.com/derickc/Fountainhead#fountain-syntax
 
 ### More Blender Screenwriter utility add-ons
+
+Add searchable markers for outlining and navigating the text:
+https://github.com/tin2tin/TextMarker-blender-addon
+
 Adding markers and writing timed script into the 3D View:
-https://github.com/tin2tin/blender-fountain-addon
+https://github.com/philippe-lavoie/blender-fountain-addon
 
 Switch cameras in 3D View from Sequencer:
 https://github.com/tin2tin/scene_strip_tools
