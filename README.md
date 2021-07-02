@@ -2,21 +2,43 @@
 Screenplay formatting in Blender Text Editor of Fountain markup syntax.  
 
 ### Demo of Main Features
+[![Img alt text](https://github.com/tin2tin/Blender_Screenwriter/blob/master/yt_thumb.jpg?raw=true)](https://www.youtube.com/watch?v=KIqQH_e8Hs4)
 
 ![](bsw_tut.gif)
 
 ### Features
 
+## Screenwriter
 - Write screenplays in Blender Text Editor.
 - Get live preview of screenplay formatting.
 - Use the simple fountain markup syntax.
+- Open as Fountain.
+- Save as Fountain.
+- Change font(for preview).
+- Insert Title Page.
+- Insert scene numbers.
+- Correct caps.
+- Insert [[SHOT: ]] note/comment - will generate a camera in the scene. 
+- ">my action<" will center action.
+- ">" will force transition.
+- "@" will force character(may not be supported by all fountain parsers).
+- "." will force scene header.
+- Export to pdf.
 - Export to fdx(Final Draft).
 - Export to Html.
-- Assign 3d objects to keywords.
+
+## Screenplayer
 - Script to Screen sequence generation.
-- Save as Fountain.
+- Assign 3d objects to screenplay keywords.
 - Extract screenplay data and timings.
-- Auto create a sequence with 3D scenes and dialogue as subtitles. 
+- Create a sequence with scene headings, action and dialogue as timed text strips.
+- Generate scenes for each screenplay scene.
+- Populated scenes with 3d objects assigned to words in the screenplay scene, where the words appear.
+- If more cameras are assigned to a scene, scene strips pointing to cameras and a multicam strip will be added to the master edit.
+- Generate cameras for each [[SHOT: ]] note/comment in the scenes where they appear. 
+- Switch to the 3d scene based on the position of the screenplay scene.
+- Switch back to the master edit scene.
+
 
 ### How to Install
 
@@ -42,12 +64,30 @@ https://fountain.io/_downloads/The%20Last%20Birthday%20Card.fountain
 ### Fountain Syntax
 https://github.com/derickc/Fountainhead#fountain-syntax
 
-### More Blender Fountain add-ons
-Adding markers and writing timed script into the 3D View:
-https://github.com/tin2tin/blender-fountain-addon
+### More Blender Screenwriter utility add-ons
 
-Improved timing and more info as text strips:
-https://github.com/gabrielmontagne/blender-addon-unfurl-fountain
+Add searchable markers for outlining and navigating the text:
+https://github.com/tin2tin/TextMarker-blender-addon
+
+Adding markers and writing timed script into the 3D View:
+https://github.com/philippe-lavoie/blender-fountain-addon
+
+Switch cameras in 3D View from Sequencer:
+https://github.com/tin2tin/scene_strip_tools
+
+Switch to the scene of the Scene strip:
+https://github.com/tin2tin/VSESwitchToScene
+
+Link text from TExt strip to text in 3D View:
+https://github.com/gabrielmontagne/blender-addon-link-text-to-vse-subtitle
+
+Split text to node editor frames:
+https://github.com/gabrielmontagne/blender-addon-split-frame-from-text
+
+Link text to node editor frames:
+https://github.com/gabrielmontagne/blender-addon-link-text-to-frame
+
+
 
 ### About
 
