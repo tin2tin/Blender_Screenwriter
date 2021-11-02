@@ -51,8 +51,10 @@ try:
     import screenplain.parsers.fountain as fountain
 except ImportError:
     subprocess.check_call([pybin, '-m', 'pip', 'install', 'screenplain[PDF]'])
+try:
     import screenplain.parsers.fountain as fountain
-
+except ImportError:
+    print("Installation of Screenplain failed. Try running Blender as admin, or install Screenplain manually.")
 
 class ObjectProperties(PropertyGroup):
     objectname: StringProperty(name="Name")
