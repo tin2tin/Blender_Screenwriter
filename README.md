@@ -1,5 +1,5 @@
 # Blender Screenwriter & Screenplayer
-Screenplay writing and automatic previz/animatic generation. 
+Screenwriter and automatic previz/animatic generation. 
 
 ### Demo of Main Features
 [![Img alt text](https://github.com/tin2tin/Blender_Screenwriter/blob/master/yt_thumb.jpg?raw=true)](https://www.youtube.com/watch?v=KIqQH_e8Hs4)
