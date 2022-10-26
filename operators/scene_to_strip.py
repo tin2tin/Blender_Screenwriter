@@ -235,14 +235,15 @@ def create_scenes_objects(channel, start, end, text):
             new_scene.frame_start = frame_start
             new_scene.frame_end = frame_end
             new_scene.world = bpy.data.worlds[0]
-
+            n = 0
             for shot_count, shot in enumerate(F.elements):
                 if shot.element_type == 'Scene Heading': 
-                    if str(shot.element_text.title()) == str(f.element_text.title()):
+                    if text == n:
                         found_scene = str(shot.element_text.title())
                         shot_camera = 0
                     else:
                         found_scene = ""
+                    n = n + 1
                 # Add shots as cameras.
                 if found_scene and (shot.element_type == 'Comment' or shot.element_type == 'Action'):
                     regex = "\\[\\[SHOT:(?i)(.*?)\\]\\]"
