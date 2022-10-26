@@ -166,7 +166,7 @@ def lay_out_scenes(scenes):
         strip.align_x = 'LEFT'
         strip.font_size = font_size
 
-        create_scenes_objects(1, next, next + total, s.name)
+        create_scenes_objects(1, next, next + total, i)
 
         next = end
 
@@ -218,7 +218,7 @@ def create_scenes_objects(channel, start, end, text):
     render = bpy.context.scene.render
     fps = round((render.fps / render.fps_base), 3)
     for fc, f in enumerate(f_collected):
-        if text == f.original_content.strip():
+        if text == fc:
             #if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
             name = str(f.element_text.title()) # f.scene_number + 
             # Don't add scene, if it is already existing.
@@ -267,7 +267,7 @@ def create_scenes_objects(channel, start, end, text):
                  
     # Add objects.
     for fc, f in enumerate(f_collected):
-        if text == f.original_content.strip():
+        if text == fc:
             key =""
             heading = ""
 
