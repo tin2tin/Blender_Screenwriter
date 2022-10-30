@@ -138,7 +138,14 @@ def register():
 
     Scene.keywords_assigner = PointerProperty(type=AssignKeywordsProperties)
     bpy.types.Scene.screenwriter_channel = bpy.props.IntProperty(default=0, min=0)
-
+    bpy.types.Scene.screenwriter_base_scene = PointerProperty(type=Scene,
+                                                   description="Base Scene used for creating new scenes")
+    bpy.types.Scene.screenwriter_general_timeline = BoolProperty(name="Only general timeline",
+                                                      description="The VSE timeline matches that of scene",
+                                                      default=True)
+    bpy.types.Scene.screenwriter_numbers = BoolProperty(name="Number Scene",
+                                                          description="Add the scene number of name",
+                                                      default=False)
     ### MENU ###
     bpy.types.TEXT_MT_text.append(screenwriter_menu_export)
 
@@ -170,3 +177,6 @@ def unregister():
     del bpy.types.Scene.last_line_index
     del bpy.types.Scene.text_replace
     del bpy.types.Scene.title_page_index
+    del bpy.types.Scene.screenwriter_base_scene
+    del bpy.types.Scene.screenwriter_general_timeline
+    del bpy.types.Scene.screenwriter_numbers
