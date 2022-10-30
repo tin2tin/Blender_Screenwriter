@@ -147,7 +147,17 @@ class SCREENWRITER_PT_screenplayer_panel(bpy.types.Panel):
         #layout.operator("text.scenes_to_strips")
         layout_big = layout.column(align=False)
         layout_big.separator()
+        # activate general timeline
+        layout_big.enabled = context.scene.screenwriter_general_timeline
+        layout_big.prop(context.scene, "screenwriter_general_timeline")
+        layout_big.enabled = context.scene.screenwriter_numbers
+        layout_big.prop(context.scene, "screenwriter_numbers")
+        layout_big.enabled = True
         layout_big.scale_y = 1.3
+        #scene in cero
+        #if context.scene.screenwriter_base_scene is None:
+        #    layout_big.alert = True
+        layout_big.prop(context.scene, "screenwriter_base_scene", text="Base Scene")
         layout_big.operator("screenwriter.fountain_to_strips", text="Generate Movie")
         #layout.operator("screenwriter.strips_to_markers")
         #layout.operator("screenwriter.clear_markers")
