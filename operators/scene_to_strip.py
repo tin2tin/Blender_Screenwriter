@@ -154,6 +154,14 @@ def lay_out_scenes(scenes):
                 strip.align_x = 'LEFT'
                 strip.font_size = font_size
 
+            else:
+                strip = create_strip(channel + 2, start + next, end + next, e.text)
+                strip.location.x = 0.05
+                strip.location.y = 0.92
+                strip.align_y = 'TOP'
+                strip.align_x = 'LEFT'
+                strip.font_size = font_size
+
             total = end
 
         total += scene_padding_seconds
@@ -166,7 +174,7 @@ def lay_out_scenes(scenes):
         strip.align_x = 'LEFT'
         strip.font_size = font_size
 
-        create_scenes_objects(1, next, next + total, s.name)
+        create_scenes_objects(1, next, next + total, i)
 
         next = end
 
@@ -218,27 +226,58 @@ def create_scenes_objects(channel, start, end, text):
     render = bpy.context.scene.render
     fps = round((render.fps / render.fps_base), 3)
     for fc, f in enumerate(f_collected):
-        if text == f.original_content.strip():
-            #if str(f.scene_number) != "": f.scene_number = f.scene_number+ " "
-            name = str(f.element_text.title()) # f.scene_number + 
-            # Don't add scene, if it is already existing.
+        if text == fc:
+            if bpy.context.scene.screenwriter_numbers == True:
+                # if scene is major of 99
+                if len(f_collected)>99:
+                    number = "{:0>3d}".format(fc + 1)
+                else:
+                    number = "{:0>2d}".format(fc + 1)
+                # Add number
+                name = number + " " + str(f.element_text.title())
+            else:
+                name = str(f.element_text.title())
+
             if name in s_collected:
                 new_scene = bpy.data.scenes[name]
             else:
-                new_scene = bpy.data.scenes.new(name=name)
+                # Set context to base scene and duplicate
+                if bpy.context.scene.screenwriter_base_scene is None:
+                    new_scene = bpy.data.scenes.new(name=name)
+                else:
+                    scene_prv = bpy.context.scene
+                    bpy.context.window.scene = bpy.context.scene.screenwriter_base_scene
+                    bpy.ops.scene.new(type='FULL_COPY')
+                    bpy.context.window.scene.name = name
+                    new_scene = bpy.data.scenes[name]
+                    bpy.context.window.scene = scene_prv
+                    scene_prv.update_tag()
+
+                # falta borrar la secuencia de video
+                #for i in (bpy.context.scene.sequence_editor.sequences_all):
+                #    bpy.context.scene.sequence_editor.sequences.remove(i)
+                #bpy.context.scene.sequence_editor.sequences.remove(bpy.context.scene.sequence_editor.active_strip)
+
+                #print(bpy.context.scene.sequence_editor.sequences_all[i].frame_start)
+                #print(bpy.context.scene.sequence_editor.sequences_all[i].frame_final_duration)
+
             new_scene.master_sequence = bpy.context.scene.name
             bpy.context.scene.master_sequence = bpy.context.scene.name
-            new_scene.render.fps_base = render.fps_base
-            new_scene.render.fps = render.fps
-            new_scene.render.resolution_x = render.resolution_x
-            new_scene.render.resolution_y = render.resolution_y
-            new_scene.frame_start = frame_start
-            new_scene.frame_end = frame_end
-            new_scene.world = bpy.data.worlds[0]
+            if bpy.context.scene.screenwriter_general_timeline == True:
+                new_scene.render.fps_base = render.fps_base
+                new_scene.render.fps = render.fps
+                new_scene.render.resolution_x = render.resolution_x
+                new_scene.render.resolution_y = render.resolution_y
+                new_scene.frame_start = frame_start
+                new_scene.frame_end = frame_end
+            else:
+                new_scene.frame_end = frame_end - frame_start
 
+            n = 0
             for shot_count, shot in enumerate(F.elements):
-                if shot.element_type == 'Scene Heading': 
-                    if str(shot.element_text.title()) == str(f.element_text.title()):
+                if shot.element_type == 'Scene Heading':
+                    #if str(shot.element_text.title()) == str(f.element_text.title()):
+                    if text == n:
                         found_scene = str(shot.element_text.title())
                         shot_camera = 0
                     else:
@@ -264,10 +303,11 @@ def create_scenes_objects(channel, start, end, text):
                         sse.sequences_all[newScene.name].animation_offset_start = 0
                         sse.sequences_all[newScene.name].frame_final_end = frame_end
                         sse.sequences_all[newScene.name].frame_start = frame_start
-                 
+
     # Add objects.
     for fc, f in enumerate(f_collected):
-        if text == f.original_content.strip():
+        if text == fc:
+        #if text == f.original_content.strip():
             key =""
             heading = ""
 
@@ -323,8 +363,8 @@ def create_scenes_objects(channel, start, end, text):
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].scene_camera = bpy.data.objects[cam.name]
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = frame_end
-                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start               
-        
+                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start
+            break
     bpy.ops.sequencer.set_range_to_strips()
 
     return {'FINISHED'}
