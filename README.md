@@ -66,7 +66,35 @@ https://github.com/derickc/Fountainhead#fountain-syntax
 
 For a complete overview of the Fountain syntax, go to [http://fountain.io/syntax](http://fountain.io/syntax).
 
-Title Page 
+#### Scene Headings
+To indicate a new scene, start a new line and type the location of the scene in all caps. For example:
+
+    INT. COFFEE SHOP - DAY
+
+#### Action
+This is where you describe what is happening in the scene. Start a new line and type your action description in plain text. For example:
+
+    John walks into the coffee shop and orders a latte.
+
+#### Dialogue
+To indicate dialogue, start a new line and type the character's name in all caps, followed by a period. Then, type the dialogue in plain text. For example:
+
+    JOHN.
+    Can I get a latte, please?
+
+#### Parentheticals
+If you need to indicate how a line of dialogue is spoken, you can use a parenthetical. Start a new line and type the character's name in all caps, followed by a period. Then, type the parenthetical in parentheses, followed by the dialogue in plain text. For example:
+
+    JOHN.
+    (sarcastic)
+    Great, just what I needed.
+
+#### Transitions 
+To indicate a transition between scenes, start a new line and type the transition in all caps. For example:
+
+    CUT TO:
+
+#### Title Page 
 The Title Page holds metadata by Key Value pairs that are separated by `:` 
 *Each key can have multiple values by placing them on newlines that are indented 3+ spaces or by a tab*
 
