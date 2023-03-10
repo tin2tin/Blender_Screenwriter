@@ -79,13 +79,13 @@ This is where you describe what is happening in the scene. Start a new line and 
 #### Dialogue
 To indicate dialogue, start a new line and type the character's name in all caps, followed by a period. Then, type the dialogue in plain text. For example:
 
-    JOHN.
+    JOHN
     Can I get a latte, please?
 
 #### Parentheticals
 If you need to indicate how a line of dialogue is spoken, you can use a parenthetical. Start a new line and type the character's name in all caps, followed by a period. Then, type the parenthetical in parentheses, followed by the dialogue in plain text. For example:
 
-    JOHN.
+    JOHN
     (sarcastic)
     Great, just what I needed.
 
