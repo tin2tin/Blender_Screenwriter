@@ -57,7 +57,8 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                             return {"CANCELLED"}
                         else:
                             bpy.context.scene.use_nodes = True
-                            tree = bpy.context.scene.node_tree
+                            #tree = bpy.context.scene.node_tree
+                            tree = bpy.data.node_groups['Mind Mapper']
 
                             F = fountain.Fountain(fountain_script)
 
@@ -136,11 +137,11 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                                         #bpy.data.texts[filename].write(margin + action + chr(10))
                                         new_node.my_string_prop = new_node.my_string_prop + action
                     #                cursor_indentation = margin
-                                    
+                                    new_node.my_string_prop += "\n"
                                 elif f.element_type == 'Action' and f.is_centered == True and new_node:
                     #                bpy.data.texts[filename].write(
                     #                    margin + f.element_text.center(document_width) + chr(10))
-                                        new_node.my_string_prop = new_node.my_string_prop + f.element_text
+                                        new_node.my_string_prop = new_node.my_string_prop + f.element_text  + "\n"
                     #                cursor_indentation = margin + ("_" * (int(
                     #                    (document_width / 2 - len(f.element_text) / 2)) - 2))
                                 elif f.element_type == 'Character' and new_node:
@@ -149,17 +150,17 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                     #                    chr(10))
                     #                cursor_indentation = margin + ("_" * ((f.element_text.center(
                     #                    document_width)).find(f.element_text)))
-                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text
+                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text  + "\n"
                                 elif f.element_type == 'Parenthetical' and new_node:
                     #                bpy.data.texts[filename].write(
                     #                    margin + f.element_text.center(document_width).lower() +
                     #                    chr(10))
                     #                cursor_indentation = margin + ("_" * int(
                     #                    (document_width / 2 - len(f.element_text) / 2)))
-                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text
+                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text + "\n"
                                 elif f.element_type == 'Dialogue' and new_node:
                     #                dialogue = f.element_text
-                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text
+                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text + "\n"
                     #                current_character
                     #                line_list = dialogue_wrapper.wrap(text=dialogue)
                     #                for dialogue in line_list:
@@ -184,12 +185,50 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                     #                    margin + f.element_text.rjust(document_width).upper() + chr(10))
                     #                cursor_indentation = margin + ("_" * (
                     #                    document_width - len(f.element_text)))
-                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text
+                                    new_node.my_string_prop = new_node.my_string_prop + f.element_text + "\n"
 #                            bpy.ops.node.select_all(action='SELECT') #crash !?
 #                            bpy.ops.node.view_all()
-                            
-                            print(tree)
+                  
                             # create links between nodes
-                            for i in range(nodes_cnt-1):
+                            for i in range(len(nodes)-1):
                                 tree.links.new(nodes[i].outputs[0], nodes[i+1].inputs[0])
+                                
+                            nodes = tree.nodes
+
+                            # Initialize the arrays to store the node order and labels
+                            node_order = []
+                            node_string_prop = []
+
+                            # Loop through the nodes in the material's node tree
+                            for node in nodes:
+                                # Check if the node is connected
+                                if node.inputs:
+                                    # Loop through the inputs of the node
+                                    for input in node.inputs:
+                                        # Check if the input is connected
+                                        if input.is_linked:
+                                            # Loop through the links of the input
+                                            for link in input.links:
+                                                # Add the from_node to the node_order array
+                                                node_order.append(link.from_node)
+                                                # Add the label of the from_node to the node_labels array
+                                                text = (link.from_node.label+"\n")
+                                                text = text + (link.from_node.my_string_prop)#.replace("\\n", chr(13))
+                                                text = (text).replace("\"", "\\n")
+                                                node_string_prop.append(text)
+
+                            # Split each string based on line breaks
+                            split_array = [string.split('\n') for string in node_string_prop]
+
+                            # Flatten the resulting array of arrays into a single array
+                            flattened_array = [item for sublist in split_array for item in sublist]
+
+                            # Join the elements of the flattened array back into a string, with line breaks between each element
+                            resulting_string = '\n'.join(flattened_array)
+                            #resulting_string = resulting_string.split('\n')
+                            
+                            
+
+                            print(resulting_string)
+                               
                             return {"FINISHED"}
