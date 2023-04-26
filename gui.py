@@ -154,6 +154,24 @@ class SCREENWRITER_PT_screenplayer_panel(bpy.types.Panel):
         #layout.prop(context.scene, 'screenwriter_channel')
 
 
+class SCREENWRITER_PT_mindmap_panel(bpy.types.Panel):
+    """Screenwriter Mindmap Options"""
+    bl_label = "Mindmap"
+    bl_parent_id = "SCREENWRITER_PT_screenplayer_panel"
+    #bl_options = {'DEFAULT_CLOSED'}
+    bl_space_type = 'TEXT_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Screenwriter"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout_big = layout.column(align=False)
+        layout_big.scale_y = 1.3
+        layout_big.operator("screenwriter.mindmap_fountain", text="Generate Mindmap")
+
+
 class SCREENWRITER_PT_navigation_panel(bpy.types.Panel):
     """Screenwriter Navigation Options"""
     bl_label = "Navigation"

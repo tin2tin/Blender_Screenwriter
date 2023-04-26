@@ -32,6 +32,7 @@ from bpy.props import IntProperty, BoolProperty, PointerProperty, StringProperty
 from .operators.dual_view import *
 from .operators.fountain_export import *
 from .operators.preview_fountain import *
+from .operators.mindmap_fountain import *
 from .operators.scene_to_strip import *
 from .operators.switch_to_scene import *
 from .operators.insert import *
@@ -79,6 +80,7 @@ classes = (SCREENWRITER_PT_panel,
             #SCREENWRITER_PT_keywords,
             #SCREENWRITER_PT_objects,
             SCREENWRITER_OT_preview_fountain,
+            SCREENWRITER_OT_mindmap_fountain,
             SCREENWRITER_OT_dual_view,
             SCREENWRITER_OT_export,
             #TEXT_OT_scenes_to_strips,
@@ -87,6 +89,7 @@ classes = (SCREENWRITER_PT_panel,
             SCREENWRITER_PT_layout_panel,
             SCREENWRITER_PT_screenplayer_panel,
             SCREENWRITER_PT_navigation_panel,
+            SCREENWRITER_PT_mindmap_panel,
             SCREENWRITER_OT_switch_to_scene,
             SCREENWRITER_OT_switch_to_master,
             SCREENWRITER_OT_insert_titlepage,
