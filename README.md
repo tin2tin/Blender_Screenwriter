@@ -40,6 +40,9 @@ Screenwriter and automatic previz/animatic generation.
 - Switch back to the master edit scene.
 
 
+## Mindmap
+- Generate Mindmap if mindmap add-on is installed: https://github.com/SpectralVectors/MindMapper
+
 ### How to Install
 
 Use Blender 2.82 Beta or higher.
