@@ -170,6 +170,7 @@ class SCREENWRITER_PT_mindmap_panel(bpy.types.Panel):
         layout_big = layout.column(align=False)
         layout_big.scale_y = 1.3
         layout_big.operator("screenwriter.mindmap_fountain", text="Generate Mindmap")
+        layout_big.operator("screenwriter.return_mindmap", text="Return Mindmap")
 
 
 class SCREENWRITER_PT_navigation_panel(bpy.types.Panel):
