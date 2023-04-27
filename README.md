@@ -44,6 +44,7 @@ Screenwriter and automatic previz/animatic generation.
 - Generate and return mindmap if the Mindmap add-on is installed: 
 https://github.com/SpectralVectors/MindMapper
 
+https://user-images.githubusercontent.com/1322593/234814066-7fe80ded-161d-4cd0-804a-e5300ce6ac67.mp4
 
 ### How to Install
 
