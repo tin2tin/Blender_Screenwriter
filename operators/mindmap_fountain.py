@@ -48,6 +48,7 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
         if context.space_data.text.name == "Preview.txt":
             print("Wrong Text Editor context!")
             return {"CANCELLED"}
+        
         current_text = bpy.context.space_data.text.name
         if current_text.strip() == "":
             return
@@ -75,9 +76,19 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                             print("The Mindmap add-on is not installed!")
                             return {"CANCELLED"}
                         else:
-                            bpy.context.scene.use_nodes = True
+
+                            space = context.space_data
+                            node_tree = space.node_tree
+                            node_active = context.active_node
+                            node_selected = context.selected_nodes
+
+                            if node_tree is None:
+                                bpy.context.scene.use_nodes = True
+                                bpy.ops.node.new_node_tree()
+                            
+                            #bpy.context.scene.use_nodes = True
                             # tree = bpy.context.scene.node_tree
-                            tree = bpy.data.node_groups["Mind Mapper"]
+                            tree = node_tree #bpy.data.node_groups["Mind Mapper"]
 
                             F = fountain.Fountain(fountain_script)
 
@@ -253,7 +264,7 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
                                 tree.links.new(
                                     nodes[i].outputs[0], nodes[i + 1].inputs[0]
                                 )
-                            return {"FINISHED"}
+        return {"FINISHED"}
 
 
 class SCREENWRITER_OT_return_mindmap(bpy.types.Operator):
