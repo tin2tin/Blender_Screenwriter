@@ -45,42 +45,53 @@ class SCREENWRITER_OT_dual_view(bpy.types.Operator):
             if debug: print('debug --- iterating through text areas') ### DEBUG
             if area.spaces.active.text == previewBlock:
                 self.report({'INFO'}, previewExists)
-    
-                # flip sidebar
-                context = bpy.context
-                c = {}  # override dictionary
-                window = context.window
-                c["window"] = window
-                for screen in bpy.data.screens:
-                    c["screen"] = screen
-                    for area in screen.areas:
-                        c["area"] = area
-                        if area.type == "TEXT_EDITOR":
-                            for region in area.regions:
-                                if region.type == 'UI':# and not (region.x - area.x):
-                                    c["region"] = region
-                                    bpy.ops.screen.region_flip(c) 
-                return {"FINISHED"}
-        
-        if debug: print('debug --- splitting context area and starting dual mode') ### DEBUG
 
-        # flip sidebar
-        context = bpy.context
-        c = {}  # override dictionary
-        window = context.window
-        c["window"] = window
-        for screen in bpy.data.screens:
-            c["screen"] = screen
-            for area in screen.areas:
-                c["area"] = area
-                if area.type == "TEXT_EDITOR":
-                    for region in area.regions:
-                        if region.type == 'UI':# and not (region.x - area.x):
-                            c["region"] = region
-                            bpy.ops.screen.region_flip(c)
+#                area = [area for area in bpy.context.screen.areas if area.type == "TEXT_EDITOR"][0]
+#                 
+#                with bpy.context.temp_override(area=area):
+#                    bpy.ops.screen.region_flip()
+#    
+#                # flip sidebar
+#                context = bpy.context
+#                c = {}  # override dictionary
+#                window = context.window
+#                c["window"] = window
+#                for screen in bpy.data.screens:
+#                    c["screen"] = screen
+#                    for area in screen.areas:
+#                        c["area"] = area
+#                        if area.type == "TEXT_EDITOR":
+#                            for region in area.regions:
+#                                if region.type == 'UI':# and not (region.x - area.x):
+#                                    c["region"] = region
+#                                    with context.temp_override(**c):
+#                                        bpy.ops.screen.region_flip()
+                return {"FINISHED"}
+#        
+#        if debug: print('debug --- splitting context area and starting dual mode') ### DEBUG
+
+#        # flip sidebar
+#        area = [area for area in bpy.context.screen.areas if area.type == "TEXT_EDITOR"][0]
+#        with bpy.context.temp_override(area=area):                 
+#                bpy.ops.screen.region_flip() 
+        
+#        context = bpy.context
+#        c = {}  # override dictionary
+#        window = context.window
+#        c["window"] = window
+#        for screen in bpy.data.screens:
+#            c["screen"] = screen
+#            for area in screen.areas:
+#                c["area"] = area
+#                if area.type == "TEXT_EDITOR":
+#                    for region in area.regions:
+#                        if region.type == 'UI':# and not (region.x - area.x):
+#                            c["region"] = region
+#                            with context.temp_override(**c):
+#                                bpy.ops.screen.region_flip()
 
         #split
-        bpy.ops.screen.area_split(direction="VERTICAL")
+        bpy.ops.screen.area_split(direction="VERTICAL", factor=0.51)
        
         #settings for preview 2.
         area = self.original_area
