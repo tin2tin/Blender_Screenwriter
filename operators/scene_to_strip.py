@@ -245,8 +245,8 @@ def create_scenes_objects(channel, start, end, text):
                         found_scene = ""
                 # Add shots as cameras.
                 if found_scene and (shot.element_type == 'Comment' or shot.element_type == 'Action'):
-                    regex = "\\[\\[SHOT:(?i)(.*?)\\]\\]"
-                    matches = re.findall(regex, shot.element_text)
+                    regex = r"\[\[SHOT:(.*?)\]\]"
+                    matches = re.findall(regex, shot.element_text, flags=re.IGNORECASE)
                     for match in matches:
                         bpy.ops.object.camera_add(rotation=(1.5708, 0, 0))
                         bpy.context.object.data.type = 'ORTHO'
