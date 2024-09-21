@@ -1,3 +1,5 @@
+[<img src="https://img.shields.io/badge/Discord%20-%20Invite">](https://discord.gg/HMYpnPzbTm) ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/tintwotin)
+
 # Blender Screenwriter & Screenplayer
 Screenwriter and automatic previz/animatic generation. 
 
