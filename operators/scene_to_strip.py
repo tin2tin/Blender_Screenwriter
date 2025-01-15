@@ -116,11 +116,10 @@ def to_scenes(script):
 
     return scenes
 
-
 def lay_out_scenes(scenes):
     next = 0
     channel = find_empty_channel()+10
-    font_size = int(bpy.context.scene.render.resolution_y/18)
+    font_size = int(bpy.context.scene.render.resolution_y/30)
 
     for i, s in enumerate(scenes):
         total = scene_padding_seconds
@@ -137,22 +136,26 @@ def lay_out_scenes(scenes):
                     end + next,
                     ('{}{}\n{}').format((e.character).upper(), (
                         e.parenthetical and '\n' + e.parenthetical),
-                        e.text)
+                        ' '.join((e.text).splitlines()))
                 )
 
+                strip.font_size = font_size
+                strip.wrap_width = 0.7          
                 strip.location.y = 0.1
-                strip.align_y = 'BOTTOM'
-                strip.location.x = 0.05
-                strip.align_x = 'LEFT'
-                strip.font_size = font_size          
+                strip.anchor_y = 'BOTTOM'
+                strip.location.x = 0.5
+                strip.anchor_x = 'CENTER'
+                strip.alignment_x = 'CENTER'
 
             elif element_type is Action:
                 strip = create_strip(channel + 2, start + next, end + next, e.text)
+                strip.wrap_width = 0.85
+                strip.font_size = font_size
                 strip.location.x = 0.05
                 strip.location.y = 0.92
-                strip.align_y = 'TOP'
-                strip.align_x = 'LEFT'
-                strip.font_size = font_size
+                strip.anchor_y = 'TOP'
+                strip.anchor_x = 'LEFT'
+                strip.alignment_x = 'LEFT'
 
             total = end
 
@@ -160,11 +163,14 @@ def lay_out_scenes(scenes):
         end = next + total
 
         strip = create_strip(channel, next, next + total, (s.name).upper())
-        strip.location.x = 0.05
-        strip.location.y = 1.0
-        strip.align_y = 'TOP'
-        strip.align_x = 'LEFT'
+        strip.wrap_width = 0.85
+        strip.use_bold = True
         strip.font_size = font_size
+        strip.location.x = 0.05
+        strip.location.y = 0.98
+        strip.anchor_y = 'TOP'
+        strip.anchor_x = 'LEFT'
+        strip.alignment_x = 'LEFT'
 
         create_scenes_objects(1, next, next + total, s.name)
 
@@ -182,8 +188,8 @@ def create_strip(channel, start, end, text):
         frame_end=frame_end
     )
 
-    strip.font_size = int(bpy.context.scene.render.resolution_y/18)
-    strip.use_shadow = True
+    strip.font_size = int(bpy.context.scene.render.resolution_y/30)
+    strip.use_outline = True
     strip.select= True
     strip.wrap_width = 0.85
     strip.text = text
@@ -203,7 +209,6 @@ def create_scenes_objects(channel, start, end, text):
     # add scene strips
     f_collected = []
     s_collected = []
-    found_scene = ""
 
     # Find scene names.
     for s in bpy.data.scenes:
@@ -235,36 +240,6 @@ def create_scenes_objects(channel, start, end, text):
             new_scene.frame_start = frame_start
             new_scene.frame_end = frame_end
             new_scene.world = bpy.data.worlds[0]
-
-            for shot_count, shot in enumerate(F.elements):
-                if shot.element_type == 'Scene Heading': 
-                    if str(shot.element_text.title()) == str(f.element_text.title()):
-                        found_scene = str(shot.element_text.title())
-                        shot_camera = 0
-                    else:
-                        found_scene = ""
-                # Add shots as cameras.
-                if found_scene and (shot.element_type == 'Comment' or shot.element_type == 'Action'):
-                    regex = r"\[\[SHOT:(.*?)\]\]"
-                    matches = re.findall(regex, shot.element_text, flags=re.IGNORECASE)
-                    for match in matches:
-                        bpy.ops.object.camera_add(rotation=(1.5708, 0, 0))
-                        bpy.context.object.data.type = 'ORTHO'
-                        bpy.context.object.data.ortho_scale = 3.2
-                        bpy.context.object.name = match
-                        new_object = bpy.data.objects[bpy.context.object.name]
-                        bpy.ops.transform.translate(value=(shot_camera * 4, 0, 0))
-                        bpy.data.scenes[new_scene.name].collection.objects.link(new_object)
-                        bpy.ops.object.delete(use_global=False, confirm=False)
-                        shot_camera += 1
-                        # Add scene strips.
-                        sse = bpy.context.scene.sequence_editor
-                        newScene=sse.sequences.new_scene(match, new_scene, channel+shot_camera, frame_start)
-                        sse.sequences_all[newScene.name].scene_camera = new_object
-                        sse.sequences_all[newScene.name].animation_offset_start = 0
-                        sse.sequences_all[newScene.name].frame_final_end = frame_end
-                        sse.sequences_all[newScene.name].frame_start = frame_start
-                 
     # Add objects.
     for fc, f in enumerate(f_collected):
         if text == f.original_content.strip():
@@ -364,8 +339,8 @@ class SCREENWRITER_OT_to_strips(bpy.types.Operator):
         try:
             filepath = space.text.name
             if filepath.strip() == "": return False
-            return ((space.type == 'TEXT_EDITOR')
-                    and Path(filepath).suffix == ".fountain")
+            return (space.type == 'TEXT_EDITOR')
+                    #and Path(filepath).suffix == ".fountain")
         except AttributeError: return False
 
     def execute(self, context):

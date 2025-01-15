@@ -119,7 +119,7 @@ def to_scenes(script):
 def lay_out_scenes(scenes):
     next = 0
     channel = find_empty_channel()+10
-    font_size = int(bpy.context.scene.render.resolution_y/18)
+    font_size = int(bpy.context.scene.render.resolution_y/30)
 
     for i, s in enumerate(scenes):
         total = scene_padding_seconds
@@ -139,19 +139,21 @@ def lay_out_scenes(scenes):
                         e.text)
                 )
 
-                strip.location.y = 0.1
-                strip.align_y = 'BOTTOM'
-                strip.location.x = 0.05
-                strip.align_x = 'LEFT'
                 strip.font_size = font_size          
+                strip.location.y = 0.1
+                strip.anchor_y = 'BOTTOM'
+                strip.location.x = 0.05
+                strip.anchor_x = 'LEFT'
+                strip.alignment_x = 'CENTER'
 
             elif element_type is Action:
                 strip = create_strip(channel + 2, start + next, end + next, e.text)
+                strip.font_size = font_size
                 strip.location.x = 0.05
                 strip.location.y = 0.92
-                strip.align_y = 'TOP'
-                strip.align_x = 'LEFT'
-                strip.font_size = font_size
+                strip.anchor_y = 'TOP'
+                strip.anchor_x = 'LEFT'
+                strip.alignment_x = 'LEFT'
 
             total = end
 
@@ -159,11 +161,12 @@ def lay_out_scenes(scenes):
         end = next + total
 
         strip = create_strip(channel, next, next + total, (s.name).upper())
+        strip.font_size = font_size
         strip.location.x = 0.05
         strip.location.y = 1.0
-        strip.align_y = 'TOP'
-        strip.align_x = 'LEFT'
-        strip.font_size = font_size
+        strip.anchor_y = 'TOP'
+        strip.anchor_x = 'LEFT'
+        strip.alignment_x = 'LEFT'
 
         create_scenes_objects(1, next, next + total, s.name)
 
@@ -181,8 +184,8 @@ def create_strip(channel, start, end, text):
         frame_end=frame_end
     )
 
-    strip.font_size = int(bpy.context.scene.render.resolution_y/18)
-    strip.use_shadow = True
+    strip.font_size = int(bpy.context.scene.render.resolution_y/30)
+    strip.use_outline = True
     strip.select= True
     strip.wrap_width = 0.85
     strip.text = text
@@ -332,8 +335,8 @@ class SCREENWRITER_OT_to_strips(bpy.types.Operator):
         try:
             filepath = space.text.name
             if filepath.strip() == "": return False
-            return ((space.type == 'TEXT_EDITOR')
-                    and Path(filepath).suffix == ".fountain")
+            return (space.type == 'TEXT_EDITOR')
+                    #and Path(filepath).suffix == ".fountain")
         except AttributeError: return False
 
     def execute(self, context):

@@ -23,8 +23,8 @@ class SCREENWRITER_OT_dual_view(bpy.types.Operator):
             filepath = space.text.name
             #filepath = bpy.context.area.spaces.active.text.filepath
             if filepath.strip() == "": return False
-            return ((space.type == 'TEXT_EDITOR')
-                    and Path(filepath).suffix == ".fountain")
+            return ((space.type == 'TEXT_EDITOR'))
+                    #and Path(filepath).suffix == ".fountain")
         except AttributeError: return False
 
 

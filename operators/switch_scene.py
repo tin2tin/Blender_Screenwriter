@@ -16,8 +16,8 @@ class SCREENWRITER_OT_switch_to_scene(bpy.types.Operator):
         try: 
             filepath = space.text.name
             if filepath.strip() == "": return False
-            return ((space.type == 'TEXT_EDITOR')
-                    and Path(filepath).suffix == ".fountain")
+            return ((space.type == 'TEXT_EDITOR'))
+                    #and Path(filepath).suffix == ".fountain")
         except AttributeError: return False
 
     def execute(self, context):

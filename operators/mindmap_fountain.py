@@ -38,9 +38,7 @@ class SCREENWRITER_OT_mindmap_fountain(bpy.types.Operator):
             # filepath = bpy.context.area.spaces.active.text.filepath
             if filepath.strip() == "":
                 return False
-            return (space.type == "TEXT_EDITOR") and Path(
-                filepath
-            ).suffix == ".fountain"
+            return (space.type == "TEXT_EDITOR") #and Path(filepath).suffix == ".fountain"
         except AttributeError:
             return False
 
