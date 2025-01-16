@@ -161,7 +161,7 @@ def lay_out_scenes(scenes):
                 cleaned_name = re.sub(r'\s+', ' ', cleaned_name).strip()
                 cleaned_name = cleaned_name.title()
                 if cleaned_name in unique_characters:
-                    chr_chan = unique_characters.index(cleaned_name)*2
+                    chr_chan = (unique_characters.index(cleaned_name)+1)*2
                     
                 # CHARACTER + (parentical)
                 strip = create_strip(
@@ -198,7 +198,7 @@ def lay_out_scenes(scenes):
 
             if element_type is Action:
                 bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+4].name = "Action"
-                strip = create_strip(channel+len(unique_characters)+4, start + next, end + next, e.text)
+                strip = create_strip(channel+len(unique_characters)*2+4, start + next, end + next, e.text)
                 strip.wrap_width = 0.85
                 strip.font_size = font_size
                 strip.location.x = 0.05
@@ -211,7 +211,7 @@ def lay_out_scenes(scenes):
                 bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+3].name = "Shot"
                 comment = re.sub(r"\[\[SHOT: ", "", e.text, flags=re.IGNORECASE)
                 comment = comment.replace("]]", "")
-                strip = create_strip(channel+len(unique_characters)+3, start + next, end + next, comment)
+                strip = create_strip(channel+len(unique_characters)*2+3, start + next, end + next, comment)
                 strip.wrap_width = 0.85
                 strip.font_size = int(font_size/1.3)
                 strip.location.x = 0.05
@@ -227,7 +227,7 @@ def lay_out_scenes(scenes):
 
         # Header
         bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+5].name = "Scene"
-        strip = create_strip(channel+len(unique_characters)+5, next, next + total, (s.name).upper())
+        strip = create_strip(channel+len(unique_characters)*2+5, next, next + total, (s.name).upper())
         strip.wrap_width = 0.85
         strip.use_bold = True
         strip.font_size = font_size
@@ -364,7 +364,7 @@ def create_scenes_objects(channel, start, end, text):
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = frame_end
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start 
-                bpy.context.scene.sequence_editor.channels[channel].name = "3D Scenes"              
+                bpy.context.scene.sequence_editor.channels[channel].name = "3D Scene"              
         
     bpy.ops.sequencer.set_range_to_strips()
 
