@@ -25,6 +25,7 @@ scene_padding_seconds = 1
 Scene = namedtuple('Scene', ['name', 'elements'])
 Dialogue = namedtuple('Dialogue', ['seconds', 'character', 'parenthetical', 'text'])
 Action = namedtuple('Action', ['seconds', 'text'])
+Comment = namedtuple('Comment', ['text'])
 
 def text_to_seconds(text):
     words = len(spaces.split(text))
@@ -113,57 +114,125 @@ def to_scenes(script):
         elif current_scene and element_type == 'Action':
             seconds = text_to_seconds(text)
             current_scene.elements.append(Action(seconds, text))
+            
+        elif element_type == 'Comment':
+            current_scene.elements.append(Comment(text))
 
     return scenes
 
 def lay_out_scenes(scenes):
     next = 0
     channel = find_empty_channel()+10
-    font_size = int(bpy.context.scene.render.resolution_y/30)
+    font_size = int(bpy.context.scene.render.resolution_y/35)
+    start=0
+    end=1
+
+    # Count characters
+    script = bpy.context.area.spaces.active.text.as_string()
+    if script.strip() == "": return {"CANCELLED"}
+    F = fountain.Fountain(script)
+    unique_characters = []
+    pattern = r'\s*[$\[].*?[$\]]\s*'
+    for i, s in enumerate(scenes):
+        for fc, f in enumerate(F.elements):
+            element_type = f.element_type
+            text = f.element_text.strip()
+
+            if element_type == 'Character':
+                cleaned_text = re.sub(pattern, '', text)
+                cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+                title_cased_name = cleaned_text.title()
+
+                if title_cased_name not in unique_characters:
+                    print(title_cased_name)
+                    unique_characters.append(title_cased_name)
 
     for i, s in enumerate(scenes):
         total = scene_padding_seconds
 
         for e in s.elements:
-            start = total
-            end = total + e.seconds
-
             element_type = type(e)
+            if element_type is not Comment:            
+                start = total
+                end = total + e.seconds
+
             if element_type is Dialogue:
+                cleaned_name = re.sub(pattern, '', e.character)
+                cleaned_name = re.sub(r'\s+', ' ', cleaned_name).strip()
+                cleaned_name = cleaned_name.title()
+                if cleaned_name in unique_characters:
+                    chr_chan = unique_characters.index(cleaned_name)*2
+                    
+                # CHARACTER + (parentical)
                 strip = create_strip(
-                    channel + 1,
+                    channel + chr_chan + 2,
                     start + next,
                     end + next,
-                    ('{}{}\n{}').format((e.character).upper(), (
-                        e.parenthetical and '\n' + e.parenthetical),
-                        e.text)
+                    ('{}{}').format((e.character).upper(), (
+                        e.parenthetical and '\n' + e.parenthetical))
                 )
-
-                strip.font_size = font_size          
-                strip.location.y = 0.1
+                bpy.context.scene.sequence_editor.channels[channel + chr_chan + 2].name = cleaned_name 
+                strip.font_size = font_size
+                strip.wrap_width = 0.7          
+                strip.location.y = 0.2
                 strip.anchor_y = 'BOTTOM'
-                strip.location.x = 0.05
-                strip.anchor_x = 'LEFT'
+                strip.location.x = 0.5
+                strip.anchor_x = 'CENTER'
+                strip.alignment_x = 'CENTER'
+                
+                #Dialogue
+                strip = create_strip(
+                    channel + chr_chan + 1,
+                    start + next,
+                    end + next,
+                    ('{}').format(' '.join((e.text).splitlines()))
+                )
+                bpy.context.scene.sequence_editor.channels[channel + chr_chan + 1].name = "Dialogue: "+cleaned_name
+                strip.font_size = font_size
+                strip.wrap_width = 0.7          
+                strip.location.y = 0.2
+                strip.anchor_y = 'TOP'
+                strip.location.x = 0.5
+                strip.anchor_x = 'CENTER'
                 strip.alignment_x = 'CENTER'
 
-            elif element_type is Action:
-                strip = create_strip(channel + 2, start + next, end + next, e.text)
+            if element_type is Action:
+                bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+4].name = "Action"
+                strip = create_strip(channel+len(unique_characters)+4, start + next, end + next, e.text)
+                strip.wrap_width = 0.85
                 strip.font_size = font_size
                 strip.location.x = 0.05
                 strip.location.y = 0.92
                 strip.anchor_y = 'TOP'
                 strip.anchor_x = 'LEFT'
                 strip.alignment_x = 'LEFT'
-
+            
+            if element_type is Comment:
+                bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+3].name = "Shot"
+                comment = re.sub(r"\[\[SHOT: ", "", e.text, flags=re.IGNORECASE)
+                comment = comment.replace("]]", "")
+                strip = create_strip(channel+len(unique_characters)+3, start + next, end + next, comment)
+                strip.wrap_width = 0.85
+                strip.font_size = int(font_size/1.3)
+                strip.location.x = 0.05
+                strip.location.y = 0.42
+                strip.anchor_y = 'TOP'
+                strip.anchor_x = 'LEFT'
+                strip.alignment_x = 'LEFT'
+                
             total = end
 
         total += scene_padding_seconds
         end = next + total
 
-        strip = create_strip(channel, next, next + total, (s.name).upper())
+        # Header
+        bpy.context.scene.sequence_editor.channels[channel+len(unique_characters)*2+5].name = "Scene"
+        strip = create_strip(channel+len(unique_characters)+5, next, next + total, (s.name).upper())
+        strip.wrap_width = 0.85
+        strip.use_bold = True
         strip.font_size = font_size
         strip.location.x = 0.05
-        strip.location.y = 1.0
+        strip.location.y = 0.98
         strip.anchor_y = 'TOP'
         strip.anchor_x = 'LEFT'
         strip.alignment_x = 'LEFT'
@@ -247,7 +316,7 @@ def create_scenes_objects(channel, start, end, text):
                     heading = k.element_text.title()
                 if (
                     heading == f.element_text.title()
-                    and k.element_type in ("Character", "Dialogue", "Action", "Scene Heading")
+                    and k.element_type in ("Character", "Dialogue", "Action", "Scene Heading", "Comment")
                 ):                   
                     key += (str(k.element_text)+' ')
 
@@ -294,7 +363,8 @@ def create_scenes_objects(channel, start, end, text):
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].scene_camera = bpy.data.objects[cam.name]
                 #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
                 bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = frame_end
-                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start               
+                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start 
+                bpy.context.scene.sequence_editor.channels[channel].name = "3D Scenes"              
         
     bpy.ops.sequencer.set_range_to_strips()
 
