@@ -165,10 +165,11 @@ class Fountain:
                 full_strip.startswith('[[') and
                 full_strip.endswith(']]')
             ):
+                print("Comment detected: "+line)
                 self.elements.append(
                     FountainElement(
                         'Comment',
-                        full_strip, #.strip('[] \t')
+                        full_strip[1:].strip(), #.strip('[] \t')
                         original_line=linenum,
                         original_content=line
                     )
