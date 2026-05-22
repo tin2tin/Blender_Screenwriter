@@ -40,7 +40,7 @@ def find_empty_channel():
     if not context.scene.sequence_editor:
         context.scene.sequence_editor_create()
 
-    sequences = context.scene.sequence_editor.sequences
+    sequences = context.scene.sequence_editor.strips
 
     if screenwriter_channel > 0:
         if sequences:
@@ -60,7 +60,7 @@ def find_empty_channel():
 def find_completely_empty_channel():
     if not bpy.context.scene.sequence_editor:
         bpy.context.scene.sequence_editor_create()   
-    sequences = bpy.context.sequences
+    sequences = bpy.context.strips
     if not sequences:
         addSceneChannel = 1
     else:
@@ -247,12 +247,12 @@ def create_strip(channel, start, end, text):
     frame_start = seconds_to_frames(start)
     frame_end = seconds_to_frames(end)
 
-    strip = bpy.context.scene.sequence_editor.sequences.new_effect(
+    strip = bpy.context.scene.sequence_editor.strips.new_effect(
         name=text,
         type='TEXT',
         channel=channel,
         frame_start=frame_start,
-        frame_end=frame_end
+        length=frame_end-frame_start
     )
 
     strip.font_size = int(bpy.context.scene.render.resolution_y/30)
@@ -356,16 +356,16 @@ def create_scenes_objects(channel, start, end, text):
                     type='MULTICAM',
                     channel=channel+camera,
                     frame_start=frame_start,
-                    frame_end=frame_end
+                    length=frame_end-frame_start
                     )
                 sse.sequences_all[newMulticam.name].multicam_source=channel 
             # Add Scene Strip if no camera-object added.
             elif camera == 0:
-                newScene=bpy.context.scene.sequence_editor.sequences.new_scene(f.element_text.title(), new_scene, channel, frame_start)
-                #bpy.context.scene.sequence_editor.sequences_all[newScene.name].scene_camera = bpy.data.objects[cam.name]
-                #bpy.context.scene.sequence_editor.sequences_all[newScene.name].animation_offset_start = 0
-                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_final_end = frame_end
-                bpy.context.scene.sequence_editor.sequences_all[newScene.name].frame_start = frame_start 
+                newScene=bpy.context.scene.sequence_editor.strips.new_scene(f.element_text.title(), new_scene, channel, frame_start)
+                #bpy.context.scene.sequence_editor.strips_all[newScene.name].scene_camera = bpy.data.objects[cam.name]
+                #bpy.context.scene.sequence_editor.strips_all[newScene.name].animation_offset_start = 0
+                bpy.context.scene.sequence_editor.strips_all[newScene.name].frame_final_end = frame_end
+                bpy.context.scene.sequence_editor.strips_all[newScene.name].frame_start = frame_start 
                 bpy.context.scene.sequence_editor.channels[channel].name = "3D Scene"              
         
     bpy.ops.sequencer.set_range_to_strips()
@@ -379,7 +379,7 @@ class SCREENWRITER_OT_strips_to_markers(bpy.types.Operator):
     bl_label = "Insert a Marker for each Strip"
 
     def execute(self, context):
-        selected_frames = {s.frame_start for s in context.selected_sequences}
+        selected_frames = {s.frame_start for s in context.selected_strips}
         timeline_markers = context.scene.timeline_markers
         for frame in selected_frames:
             timeline_markers.new(name='F_{}'.format(frame), frame=frame)
