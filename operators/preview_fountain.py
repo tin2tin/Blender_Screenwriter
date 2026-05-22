@@ -223,9 +223,36 @@ class SCREENWRITER_OT_preview_fountain(bpy.types.Operator):
                 cursor_indentation_actual = cursor_indentation
 
         line = jump_to_line - 1
-        if line < 0: line = 0
-        bpy.data.texts[filename].current_line_index = line
+        if line < 0:
+            line = 0
+
+        preview_text = bpy.data.texts[filename]
+        if line >= len(preview_text.lines):
+            line = len(preview_text.lines) - 1
+        if line < 0:
+            line = 0
+
         cur = current_character + len(cursor_indentation_actual)
-        bpy.data.texts[filename].select_set(line, cur, line, cur)
+        line_body = preview_text.lines[line].body if preview_text.lines else ""
+        if cur > len(line_body):
+            cur = len(line_body)
+
+        # Scroll the preview to keep the cursor visible, then restore character position.
+        for window in bpy.context.window_manager.windows:
+            for area in window.screen.areas:
+                if area.type == 'TEXT_EDITOR' and area.spaces.active.text == preview_text:
+                    for region in area.regions:
+                        if region.type == 'WINDOW':
+                            with bpy.context.temp_override(window=window, area=area, region=region):
+                                bpy.ops.text.jump(line=line + 1)
+                            break
+                    preview_text.current_character = cur
+                    preview_text.select_set(line, cur, line, cur)
+                    area.tag_redraw()
+                    break
+        else:
+            preview_text.current_line_index = line
+            preview_text.current_character = cur
+            preview_text.select_set(line, cur, line, cur)
 
         return {"FINISHED"}
